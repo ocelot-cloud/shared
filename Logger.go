@@ -17,7 +17,6 @@ const (
 )
 
 var LogLevel LogLevelValue
-var logger Logger
 
 type Logger interface {
 	Trace(message string, v ...any)
