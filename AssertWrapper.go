@@ -9,6 +9,10 @@ func AssertTrue(t *testing.T, condition bool, msg ...string) {
 	assert.True(t, condition, msg)
 }
 
+func AssertFalse(t *testing.T, condition bool, msg ...string) {
+	assert.False(t, condition, msg)
+}
+
 func AssertEqual(t *testing.T, expected interface{}, actual interface{}, msg ...string) {
 	assert.Equal(t, expected, actual, msg)
 }
