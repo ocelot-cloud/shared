@@ -41,13 +41,15 @@ func ProvideLogger() Logger {
 
 	multi := zerolog.MultiLevelWriter(
 		zerolog.ConsoleWriter{
-			Out:        logFile,
-			TimeFormat: time.RFC3339,
-			NoColor:    true,
+			Out:          logFile,
+			TimeFormat:   time.RFC3339,
+			NoColor:      true,
+			TimeLocation: time.UTC,
 		},
 		zerolog.ConsoleWriter{
-			Out:        os.Stdout,
-			TimeFormat: time.RFC3339,
+			Out:          os.Stdout,
+			TimeFormat:   time.RFC3339,
+			TimeLocation: time.UTC,
 		},
 	)
 
