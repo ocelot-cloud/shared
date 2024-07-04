@@ -33,4 +33,8 @@ func NotNil(t *testing.T, object interface{}, msg ...string) {
 	assert.NotNil(t, object, msg)
 }
 
+func NotEqual(t *testing.T, object interface{}, msg ...string) {
+	assert.NotEqual(t, object, msg)
+}
+
 type PanicFunc func()
