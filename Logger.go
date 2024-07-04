@@ -34,7 +34,7 @@ func (l LogLevelValue) String() string {
 }
 
 func ProvideLogger() Logger {
-	logFile, err := os.OpenFile("logs.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile("data/logs.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		panic("Failed to open log file")
 	}
