@@ -7,6 +7,17 @@ import (
 	"time"
 )
 
+var DataDir = "data"
+
+func init() {
+	if _, err := os.Stat(DataDir); os.IsNotExist(err) {
+		if err := os.MkdirAll(DataDir, os.ModePerm); err != nil {
+			msg := fmt.Sprintf("Error creating data directory: %v. Terminating application.", err)
+			panic(msg)
+		}
+	}
+}
+
 type LogLevelValue int
 
 const (
@@ -26,7 +37,6 @@ type Logger interface {
 	Warn(message string, v ...any)
 	Error(message string, v ...any)
 	Fatal(message string, v ...any)
-	LogAndReturnError(message string, v ...any) error
 }
 
 func (l LogLevelValue) String() string {
@@ -94,11 +104,6 @@ func (m *MyLogger) Warn(format string, v ...any) {
 
 func (m *MyLogger) Error(format string, v ...any) {
 	m.Logger.Error().Msgf(format, v...)
-}
-
-func (m *MyLogger) LogAndReturnError(format string, v ...any) error {
-	m.Logger.Error().Msgf(format, v...)
-	return fmt.Errorf(format, v...)
 }
 
 func (m *MyLogger) Fatal(format string, v ...any) {
