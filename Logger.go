@@ -58,6 +58,10 @@ func SetLogLevel(logLevel string) {
 	}
 }
 
+func GetLogLevel() string {
+	return globalLogLevel.String()
+}
+
 func (l LogLevelValue) String() string {
 	return [...]string{"TRACE", "DEBUG", "INFO", "WARN", "ERROR"}[l]
 }
