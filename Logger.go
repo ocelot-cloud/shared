@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/rs/zerolog"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -28,7 +29,7 @@ const (
 	ERROR
 )
 
-var LogLevel LogLevelValue
+var globalLogLevel LogLevelValue
 
 type Logger interface {
 	Trace(message string, v ...any)
@@ -37,6 +38,24 @@ type Logger interface {
 	Warn(message string, v ...any)
 	Error(message string, v ...any)
 	Fatal(message string, v ...any)
+}
+
+func SetLogLevel(logLevel string) {
+	level := strings.ToUpper(logLevel)
+	switch level {
+	case "TRACE":
+		globalLogLevel = TRACE
+	case "DEBUG":
+		globalLogLevel = DEBUG
+	case "INFO":
+		globalLogLevel = INFO
+	case "WARN":
+		globalLogLevel = WARN
+	case "ERROR":
+		globalLogLevel = ERROR
+	default:
+		panic("Invalid log level: " + logLevel)
+	}
 }
 
 func (l LogLevelValue) String() string {
@@ -64,7 +83,7 @@ func ProvideLogger() Logger {
 	)
 
 	var zerologLibraryLogLevel zerolog.Level
-	switch LogLevel {
+	switch globalLogLevel {
 	case TRACE:
 		zerologLibraryLogLevel = zerolog.TraceLevel
 	case DEBUG:
