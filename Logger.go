@@ -54,7 +54,7 @@ func SetLogLevel(logLevel string) {
 	case "ERROR":
 		globalLogLevel = ERROR
 	default:
-		panic("Invalid log level: " + logLevel)
+		globalLogLevel = INFO
 	}
 }
 
