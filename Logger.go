@@ -19,17 +19,17 @@ func init() {
 	}
 }
 
-type LogLevelValue int
+type logLevelValue int
 
 const (
-	TRACE LogLevelValue = iota
+	TRACE logLevelValue = iota
 	DEBUG
 	INFO
 	WARN
 	ERROR
 )
 
-var globalLogLevel LogLevelValue
+var globalLogLevel logLevelValue
 
 type Logger interface {
 	Trace(message string, v ...any)
@@ -40,7 +40,7 @@ type Logger interface {
 	Fatal(message string, v ...any)
 }
 
-func SetLogLevel(logLevel string) {
+func setLogLevel(logLevel string) {
 	level := strings.ToUpper(logLevel)
 	switch level {
 	case "TRACE":
@@ -62,11 +62,12 @@ func GetLogLevel() string {
 	return globalLogLevel.String()
 }
 
-func (l LogLevelValue) String() string {
+func (l logLevelValue) String() string {
 	return [...]string{"TRACE", "DEBUG", "INFO", "WARN", "ERROR"}[l]
 }
 
-func ProvideLogger() Logger {
+func ProvideLogger(logLevel string) Logger {
+	setLogLevel(logLevel)
 	logFile, err := os.OpenFile("data/logs.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		panic("Failed to open log file")
@@ -102,33 +103,33 @@ func ProvideLogger() Logger {
 		panic("No valid log level set.")
 	}
 	logger := zerolog.New(multi).Level(zerologLibraryLogLevel).With().Timestamp().CallerWithSkipFrameCount(3).Logger()
-	return &MyLogger{&logger}
+	return &myLogger{&logger}
 }
 
-type MyLogger struct {
+type myLogger struct {
 	Logger *zerolog.Logger
 }
 
-func (m *MyLogger) Trace(format string, v ...any) {
+func (m *myLogger) Trace(format string, v ...any) {
 	m.Logger.Trace().Msgf(format, v...)
 }
 
-func (m *MyLogger) Debug(format string, v ...any) {
+func (m *myLogger) Debug(format string, v ...any) {
 	m.Logger.Debug().Msgf(format, v...)
 }
 
-func (m *MyLogger) Info(format string, v ...any) {
+func (m *myLogger) Info(format string, v ...any) {
 	m.Logger.Info().Msgf(format, v...)
 }
 
-func (m *MyLogger) Warn(format string, v ...any) {
+func (m *myLogger) Warn(format string, v ...any) {
 	m.Logger.Warn().Msgf(format, v...)
 }
 
-func (m *MyLogger) Error(format string, v ...any) {
+func (m *myLogger) Error(format string, v ...any) {
 	m.Logger.Error().Msgf(format, v...)
 }
 
-func (m *MyLogger) Fatal(format string, v ...any) {
+func (m *myLogger) Fatal(format string, v ...any) {
 	m.Logger.Fatal().Msgf(format, v...)
 }
