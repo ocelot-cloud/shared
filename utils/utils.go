@@ -97,7 +97,7 @@ func (c *ComponentClient) DoRequestWithFullResponse(path string, payload interfa
 		c.Cookie = resp.Cookies()[0]
 	}
 
-	// Response body can only be read once. When reading it after this function, an error occurs. So a copy is created.
+	// Response body can only be read once. When reading it a second time, an error occurs. So a copy is created.
 	newResp := &http.Response{
 		StatusCode: resp.StatusCode,
 		Header:     resp.Header,
