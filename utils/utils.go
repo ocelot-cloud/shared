@@ -2,6 +2,8 @@ package utils
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/ocelot-cloud/shared"
@@ -9,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 var Logger = shared.ProvideLogger(os.Getenv("LOG_LEVEL"))
@@ -163,4 +166,22 @@ func GetCorsDisablingHandler(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+func GenerateCookie() (*http.Cookie, error) {
+	randomBytes := make([]byte, 32)
+	if _, err := rand.Read(randomBytes); err != nil {
+		Logger.Error("Failed to generate cookie: %v", err)
+		return nil, err
+	}
+	return &http.Cookie{
+		Name:    "auth",
+		Value:   hex.EncodeToString(randomBytes),
+		Expires: GetTimeIn30Days(),
+		Path:    "/",
+	}, nil
+}
+
+func GetTimeIn30Days() time.Time {
+	return time.Now().UTC().AddDate(0, 0, 30)
 }
