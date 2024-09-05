@@ -3,10 +3,12 @@ package utils
 import (
 	"bytes"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"github.com/ocelot-cloud/shared"
+	"golang.org/x/crypto/bcrypt"
 	"io"
 	"net/http"
 	"os"
@@ -184,4 +186,23 @@ func GenerateCookie() (*http.Cookie, error) {
 
 func GetTimeIn30Days() time.Time {
 	return time.Now().UTC().AddDate(0, 0, 30)
+}
+
+func SaltAndHash(clearText string) (string, error) {
+	hashValue, err := bcrypt.GenerateFromPassword([]byte(clearText), bcrypt.DefaultCost)
+	if err != nil {
+		Logger.Error("Failed to hash text: %v", err)
+		return "", fmt.Errorf("hashing failed")
+	}
+	return string(hashValue), nil
+}
+
+func Hash(clearText string) (string, error) {
+	hashValue := sha256.New()
+	_, err := hashValue.Write([]byte(clearText))
+	if err != nil {
+		Logger.Error("Failed to hash text: %v", err)
+		return "", fmt.Errorf("hashing failed")
+	}
+	return hex.EncodeToString(hashValue.Sum(nil)), nil
 }
