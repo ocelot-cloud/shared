@@ -126,10 +126,10 @@ func assertOkStatusAndExtractBody(resp *http.Response) ([]byte, error) {
 	var bodyBuffer bytes.Buffer
 	teeReader := io.TeeReader(resp.Body, &bodyBuffer)
 
-	if resp.StatusCode != http.StatusOK {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusFound {
 		respBody, err := io.ReadAll(teeReader)
 		if err != nil {
-			return nil, fmt.Errorf("Expected status code 200, but got %d. Also failed to read response body: %v", resp.StatusCode, err)
+			return nil, fmt.Errorf("Expected status code %d, but got %d. Also failed to read response body: %v", resp.StatusCode, resp.StatusCode, err)
 		}
 		errorMessage := GetErrMsg(resp.StatusCode, string(respBody))
 		trimmedStr := strings.TrimSuffix(errorMessage, "\n")
