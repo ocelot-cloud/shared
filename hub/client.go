@@ -56,7 +56,7 @@ type HubClient struct {
 	UploadContent []byte
 }
 
-func getRegistrationForm(hub *HubClient) *RegistrationForm {
+func GetRegistrationForm(hub *HubClient) *RegistrationForm {
 	return &RegistrationForm{
 		User:     hub.Parent.User,
 		Password: hub.Parent.Password,
@@ -80,17 +80,17 @@ func GetHub() *HubClient {
 		Tag:           sampleTag,
 		UploadContent: []byte(sampleTagFileContent),
 	}
-	hub.wipeData()
+	hub.WipeData()
 	return hub
 }
 
-func (h *HubClient) registerUser() error {
-	form := getRegistrationForm(h)
+func (h *HubClient) RegisterUser() error {
+	form := GetRegistrationForm(h)
 	_, err := h.Parent.DoRequest(RegistrationPath, form, "")
 	return err
 }
 
-func (h *HubClient) login() error {
+func (h *HubClient) Login() error {
 	creds := LoginCredentials{
 		User:     h.Parent.User,
 		Password: h.Parent.Password,
@@ -110,17 +110,17 @@ func (h *HubClient) login() error {
 	return nil
 }
 
-func (h *HubClient) deleteUser() error {
+func (h *HubClient) DeleteUser() error {
 	_, err := h.Parent.DoRequest(DeleteUserPath, nil, "")
 	return err
 }
 
-func (h *HubClient) createApp() error {
+func (h *HubClient) CreateApp() error {
 	_, err := h.Parent.DoRequest(AppCreationPath, utils.SingleString{h.App}, "")
 	return err
 }
 
-func (h *HubClient) findApps(searchTerm string) ([]UserAndApp, error) {
+func (h *HubClient) FindApps(searchTerm string) ([]UserAndApp, error) {
 	result, err := h.Parent.DoRequest(SearchAppsPath, utils.SingleString{searchTerm}, "")
 	if err != nil {
 		return nil, err
@@ -148,7 +148,7 @@ func (h *HubClient) GetApps() ([]string, error) {
 	return *apps, nil
 }
 
-func (h *HubClient) uploadTag() error {
+func (h *HubClient) UploadTag() error {
 	tapUpload := &TagUpload{
 		App:     h.App,
 		Tag:     h.Tag,
@@ -158,7 +158,7 @@ func (h *HubClient) uploadTag() error {
 	return err
 }
 
-func (h *HubClient) downloadTag() (string, error) {
+func (h *HubClient) DownloadTag() (string, error) {
 	tagInfo := &TagInfo{
 		User: h.Parent.User,
 		App:  h.App,
@@ -178,7 +178,7 @@ func (h *HubClient) downloadTag() (string, error) {
 	return string(downloadedContent), nil
 }
 
-func (h *HubClient) getTags() ([]string, error) {
+func (h *HubClient) GetTags() ([]string, error) {
 	usernameAndApp := &UserAndApp{
 		User: h.Parent.User,
 		App:  h.App,
@@ -211,7 +211,7 @@ func unpackResponse[T any](object interface{}) (*T, error) {
 	return &result, nil
 }
 
-func (h *HubClient) deleteTag() error {
+func (h *HubClient) DeleteTag() error {
 	tagInfo := &AppAndTag{
 		App: h.App,
 		Tag: h.Tag,
@@ -220,12 +220,12 @@ func (h *HubClient) deleteTag() error {
 	return err
 }
 
-func (h *HubClient) deleteApp() error {
+func (h *HubClient) DeleteApp() error {
 	_, err := h.Parent.DoRequest(AppDeletePath, utils.SingleString{h.App}, "")
 	return err
 }
 
-func (h *HubClient) changePassword() error {
+func (h *HubClient) ChangePassword() error {
 	form := utils.ChangePasswordForm{
 		OldPassword: h.Parent.Password,
 		NewPassword: h.Parent.NewPassword,
@@ -235,17 +235,17 @@ func (h *HubClient) changePassword() error {
 	return err
 }
 
-func (h *HubClient) wipeData() error {
+func (h *HubClient) WipeData() error {
 	_, err := h.Parent.DoRequest(WipeDataPath, nil, "")
 	return err
 }
 
-func (h *HubClient) logout() error {
+func (h *HubClient) Logout() error {
 	_, err := h.Parent.DoRequest(LogoutPath, nil, "")
 	return err
 }
 
-func (h *HubClient) checkAuth() error {
+func (h *HubClient) CheckAuth() error {
 	_, err := h.Parent.DoRequest(AuthCheckPath, nil, "")
 	return err
 }
