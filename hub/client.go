@@ -34,17 +34,17 @@ var (
 )
 
 var (
-	sampleUser           = "myuser"
-	sampleApp            = "myapp"
-	sampleTag            = "v0.0.1"
-	sampleTagFileContent = "hello"
-	sampleEmail          = "testuser@example.com"
-	samplePassword       = "mypassword"
-	sampleOrigin         = RootUrl
-	sampleForm           = &RegistrationForm{
-		sampleUser,
-		samplePassword,
-		sampleEmail,
+	SampleUser           = "myuser"
+	SampleApp            = "myapp"
+	SampleTag            = "v0.0.1"
+	SampleTagFileContent = "hello"
+	SampleEmail          = "testuser@example.com"
+	SamplePassword       = "mypassword"
+	SampleOrigin         = RootUrl
+	SampleForm           = &RegistrationForm{
+		SampleUser,
+		SamplePassword,
+		SampleEmail,
 	}
 )
 
@@ -67,18 +67,18 @@ func GetRegistrationForm(hub *HubClient) *RegistrationForm {
 func GetHub() *HubClient {
 	hub := &HubClient{
 		Parent: utils.ComponentClient{
-			User:            sampleUser,
-			Password:        samplePassword,
+			User:            SampleUser,
+			Password:        SamplePassword,
 			Origin:          RootUrl,
 			SetOriginHeader: true,
 			SetCookieHeader: true,
 			RootUrl:         RootUrl,
 		},
 
-		Email:         sampleEmail,
-		App:           sampleApp,
-		Tag:           sampleTag,
-		UploadContent: []byte(sampleTagFileContent),
+		Email:         SampleEmail,
+		App:           SampleApp,
+		Tag:           SampleTag,
+		UploadContent: []byte(SampleTagFileContent),
 	}
 	hub.WipeData()
 	return hub
