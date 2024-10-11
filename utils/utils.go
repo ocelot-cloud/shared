@@ -223,14 +223,22 @@ func ZipDirectoryToBytes(dirPath string) ([]byte, error) {
 			return nil
 		}
 
+		relPath, err := filepath.Rel(dirPath, path)
+		if err != nil {
+			return err
+		}
+
 		header, err := zip.FileInfoHeader(info)
 		if err != nil {
 			return err
 		}
 
-		header.Name, _ = filepath.Rel(filepath.Dir(dirPath), path)
+		header.Name = relPath
+
 		if info.IsDir() {
 			header.Name += "/"
+		} else {
+			header.Method = zip.Deflate
 		}
 
 		writer, err := zipWriter.CreateHeader(header)
@@ -263,6 +271,7 @@ func ZipDirectoryToBytes(dirPath string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	Logger.Info("zipped directory %s and stored its %v bytes in the database for integration testing", dirPath, len(buf.Bytes()))
+
+	Logger.Info("zipped files in directory %s into a file of %v bytes", dirPath, len(buf.Bytes()))
 	return buf.Bytes(), nil
 }
