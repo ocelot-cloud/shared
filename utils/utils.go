@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"archive/zip"
 	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
@@ -12,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 )
@@ -206,4 +208,61 @@ func Hash(clearText string) (string, error) {
 		return "", fmt.Errorf("hashing failed")
 	}
 	return hex.EncodeToString(hashValue.Sum(nil)), nil
+}
+
+func ZipDirectoryToBytes(dirPath string) ([]byte, error) {
+	buf := new(bytes.Buffer)
+	zipWriter := zip.NewWriter(buf)
+
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if path == dirPath {
+			return nil
+		}
+
+		header, err := zip.FileInfoHeader(info)
+		if err != nil {
+			return err
+		}
+
+		header.Name, _ = filepath.Rel(filepath.Dir(dirPath), path)
+		if info.IsDir() {
+			header.Name += "/"
+		}
+
+		writer, err := zipWriter.CreateHeader(header)
+		if err != nil {
+			return err
+		}
+
+		if !info.IsDir() {
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			_, err = io.Copy(writer, file)
+			if err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		zipWriter.Close()
+		return nil, err
+	}
+
+	err = zipWriter.Close()
+	if err != nil {
+		return nil, err
+	}
+	Logger.Info("zipped directory %s and stored its %v bytes in the database for integration testing", dirPath, len(buf.Bytes()))
+	return buf.Bytes(), nil
 }
