@@ -275,3 +275,17 @@ func ZipDirectoryToBytes(dirPath string) ([]byte, error) {
 	Logger.Info("zipped files in directory %s into a file of %v bytes", dirPath, len(buf.Bytes()))
 	return buf.Bytes(), nil
 }
+
+func UnpackResponse[T any](object interface{}) (*T, error) {
+	respBody, ok := object.([]byte)
+	if !ok {
+		return nil, fmt.Errorf("Failed to assert result to []byte")
+	}
+
+	var result T
+	err := json.Unmarshal(respBody, &result)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to unmarshal response body: %v", err)
+	}
+	return &result, nil
+}
