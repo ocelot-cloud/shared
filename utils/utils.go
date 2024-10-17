@@ -26,6 +26,10 @@ type SingleString struct {
 	Value string `json:"value"`
 }
 
+type SingleInteger struct {
+	Value int `json:"value"`
+}
+
 type ChangePasswordForm struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
