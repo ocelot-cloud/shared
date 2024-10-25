@@ -184,10 +184,11 @@ func GenerateCookie() (*http.Cookie, error) {
 		return nil, err
 	}
 	return &http.Cookie{
-		Name:    "auth",
-		Value:   hex.EncodeToString(randomBytes),
-		Expires: GetTimeIn30Days(),
-		Path:    "/",
+		Name:     "auth",
+		Value:    hex.EncodeToString(randomBytes),
+		Expires:  GetTimeIn30Days(),
+		Path:     "/",
+		SameSite: http.SameSiteStrictMode,
 	}, nil
 }
 
