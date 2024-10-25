@@ -20,8 +20,6 @@ import (
 
 var Logger = shared.ProvideLogger(os.Getenv("LOG_LEVEL"))
 
-const OriginHeader = "Origin"
-
 type SingleString struct {
 	Value string `json:"value"`
 }
@@ -52,9 +50,7 @@ type ComponentClient struct {
 	User            string
 	Password        string
 	NewPassword     string
-	Origin          string
 	Cookie          *http.Cookie
-	SetOriginHeader bool
 	SetCookieHeader bool
 	RootUrl         string
 }
@@ -86,7 +82,7 @@ func (c *ComponentClient) DoRequestWithFullResponse(path string, payload interfa
 		return nil, fmt.Errorf("Failed to create request: %v", err)
 	}
 	req.Header.Set("Content-Type", "application/json")
-	SetCookieAndOriginHeaders(req, c)
+	SetCookieHeaders(req, c)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -117,10 +113,7 @@ func (c *ComponentClient) DoRequestWithFullResponse(path string, payload interfa
 	return newResp, nil
 }
 
-func SetCookieAndOriginHeaders(req *http.Request, c *ComponentClient) {
-	if c.SetOriginHeader {
-		req.Header.Set(OriginHeader, c.Origin)
-	}
+func SetCookieHeaders(req *http.Request, c *ComponentClient) {
 	if c.SetCookieHeader && c.Cookie != nil {
 		req.AddCookie(c.Cookie)
 	}
