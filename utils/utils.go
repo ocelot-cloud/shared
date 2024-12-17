@@ -53,6 +53,7 @@ type ComponentClient struct {
 	Cookie          *http.Cookie
 	SetCookieHeader bool
 	RootUrl         string
+	Origin          string
 }
 
 func (c *ComponentClient) DoRequest(path string, payload interface{}, expectedMessage string) (interface{}, error) {
@@ -83,6 +84,9 @@ func (c *ComponentClient) DoRequestWithFullResponse(path string, payload interfa
 	}
 	req.Header.Set("Content-Type", "application/json")
 	SetCookieHeaders(req, c)
+	if c.Origin != "" {
+		req.Header.Set("Origin", c.Origin)
+	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
