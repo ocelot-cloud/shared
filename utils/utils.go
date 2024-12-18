@@ -13,6 +13,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -290,4 +291,29 @@ func UnpackResponse[T any](object interface{}) (*T, error) {
 		return nil, fmt.Errorf("Failed to unmarshal response body: %v", err)
 	}
 	return &result, nil
+}
+
+func KillPotentiallyDisturbingPreExistingComponentProcesses(processes []string) {
+	processKillCommandTemplate := "pgrep -f %s | xargs -I %% kill -9 %%"
+	var processKillCommands []string
+	for _, process := range processes {
+		command := fmt.Sprintf(processKillCommandTemplate, process)
+		processKillCommands = append(processKillCommands, command)
+	}
+	runShellCommands(processKillCommands)
+}
+
+func runShellCommands(commands []string) {
+	for _, command := range commands {
+		_ = exec.Command("/bin/sh", "-c", command).Run()
+	}
+}
+
+func PruneDockerToEmptySetup() {
+	dockerPruningCommands := []string{
+		"docker rm $(docker ps -a -q) -f",
+		"docker network prune -f",
+		"docker volume prune -a -f",
+		"docker image prune -f"}
+	runShellCommands(dockerPruningCommands)
 }
