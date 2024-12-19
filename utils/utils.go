@@ -291,13 +291,3 @@ func UnpackResponse[T any](object interface{}) (*T, error) {
 	}
 	return &result, nil
 }
-
-func PromptForContinuation(prompt string) {
-	fmt.Printf("%s (y/N): ", prompt)
-	var response string
-	fmt.Scanln(&response)
-	if response != "y" && response != "Y" {
-		fmt.Println("Command aborted.")
-		os.Exit(0)
-	}
-}
