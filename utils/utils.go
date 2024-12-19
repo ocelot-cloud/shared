@@ -13,7 +13,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -293,27 +292,12 @@ func UnpackResponse[T any](object interface{}) (*T, error) {
 	return &result, nil
 }
 
-func KillPotentiallyDisturbingPreExistingComponentProcesses(processes []string) {
-	processKillCommandTemplate := "pgrep -f %s | xargs -I %% kill -9 %%"
-	var processKillCommands []string
-	for _, process := range processes {
-		command := fmt.Sprintf(processKillCommandTemplate, process)
-		processKillCommands = append(processKillCommands, command)
+func PromptForContinuation(prompt string) {
+	fmt.Printf("%s (y/N): ", prompt)
+	var response string
+	fmt.Scanln(&response)
+	if response != "y" && response != "Y" {
+		fmt.Println("Command aborted.")
+		os.Exit(0)
 	}
-	runShellCommands(processKillCommands)
-}
-
-func runShellCommands(commands []string) {
-	for _, command := range commands {
-		_ = exec.Command("/bin/sh", "-c", command).Run()
-	}
-}
-
-func PruneDockerToEmptySetup() {
-	dockerPruningCommands := []string{
-		"docker rm $(docker ps -a -q) -f",
-		"docker network prune -f",
-		"docker volume prune -a -f",
-		"docker image prune -f"}
-	runShellCommands(dockerPruningCommands)
 }
