@@ -292,15 +292,25 @@ func UnpackResponse[T any](object interface{}) (*T, error) {
 	return &result, nil
 }
 
-func CreateTempDir() (string, error) {
-	tempDir, err := os.MkdirTemp("", "validateVersion")
+// TODO To be tested
+// UnzipToTempDir unzips the given zip bytes to a temporary directory and returns the path to the directory.
+func UnzipToTempDir(zipBytes []byte) (string, error) {
+	tempDir, err := createTempDir()
+	if err != nil {
+		return "", err
+	}
+	return tempDir, unzipToDir(zipBytes, tempDir)
+}
+
+func createTempDir() (string, error) {
+	tempDir, err := os.MkdirTemp("", "temp")
 	if err != nil {
 		return "", fmt.Errorf("failed to create temp dir: %v", err)
 	}
 	return tempDir, nil
 }
 
-func UnzipToDir(zipBytes []byte, dest string) error {
+func unzipToDir(zipBytes []byte, dest string) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(zipBytes), int64(len(zipBytes)))
 	if err != nil {
 		return fmt.Errorf("failed to read zip file: %v", err)
