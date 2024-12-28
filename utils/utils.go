@@ -291,3 +291,57 @@ func UnpackResponse[T any](object interface{}) (*T, error) {
 	}
 	return &result, nil
 }
+
+func CreateTempDir() (string, error) {
+	tempDir, err := os.MkdirTemp("", "validateVersion")
+	if err != nil {
+		return "", fmt.Errorf("failed to create temp dir: %v", err)
+	}
+	return tempDir, nil
+}
+
+func UnzipToDir(zipBytes []byte, dest string) error {
+	zipReader, err := zip.NewReader(bytes.NewReader(zipBytes), int64(len(zipBytes)))
+	if err != nil {
+		return fmt.Errorf("failed to read zip file: %v", err)
+	}
+
+	for _, file := range zipReader.File {
+		if strings.Contains(file.Name, "..") {
+			return fmt.Errorf("invalid file path in zip: %s", file.Name)
+		}
+
+		fpath := filepath.Join(dest, file.Name)
+		if file.FileInfo().IsDir() {
+			if err := os.MkdirAll(fpath, os.ModePerm); err != nil {
+				return fmt.Errorf("failed to create directory: %v", err)
+			}
+			continue
+		}
+
+		if err := os.MkdirAll(filepath.Dir(fpath), os.ModePerm); err != nil {
+			return fmt.Errorf("failed to create directory: %v", err)
+		}
+
+		rc, err := file.Open()
+		if err != nil {
+			return fmt.Errorf("failed to open file in zip: %v", err)
+		}
+
+		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+		if err != nil {
+			rc.Close()
+			return fmt.Errorf("failed to open file: %v", err)
+		}
+
+		if _, err := io.Copy(outFile, rc); err != nil {
+			rc.Close()
+			outFile.Close()
+			return fmt.Errorf("failed to copy file: %v", err)
+		}
+
+		rc.Close()
+		outFile.Close()
+	}
+	return nil
+}
