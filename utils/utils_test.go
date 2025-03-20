@@ -2,9 +2,11 @@ package utils
 
 import (
 	"github.com/ocelot-cloud/shared/assert"
+	"net/http"
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 func TestZipUnzip(t *testing.T) {
@@ -48,4 +50,16 @@ func TestSaltAndHash(t *testing.T) {
 	assert.True(t, DoesMatchSaltedHash(sampleString, saltedAndHashedString2))
 	assert.False(t, DoesMatchSaltedHash(sampleString+"x", saltedAndHashedString))
 	assert.False(t, DoesMatchSaltedHash(sampleString+"x", saltedAndHashedString2))
+}
+
+func TestGenerateCookie(t *testing.T) {
+	cookie, err := GenerateCookie()
+	assert.Nil(t, err)
+	assert.NotNil(t, cookie)
+	assert.Equal(t, "auth", cookie.Name)
+	assert.True(t, len(cookie.Value) > 0)
+	assert.Equal(t, "/", cookie.Path)
+	assert.Equal(t, http.SameSiteStrictMode, cookie.SameSite)
+	assert.True(t, cookie.Expires.After(time.Now()))
+	assert.True(t, cookie.Expires.Before(time.Now().Add(31*24*time.Hour)))
 }

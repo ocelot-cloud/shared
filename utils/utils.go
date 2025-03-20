@@ -163,19 +163,13 @@ func GetErrMsg(actualStatusCode int, respBodyMsg string) string {
 	return fmt.Sprintf("Expected status code 200, but got %d.%s", actualStatusCode, msg)
 }
 
-// GetCorsDisablingHandler This is necessary to allow cross-origin requests from the Ocelot-Cloud GUI to the Hub.
-// or when testing frontend and backend components separately. The "Origin" header is managed and checked with custom logic to prevent CSRF attacks.
-// TODO Rename to ApplyCorsDisable
+// GetCorsDisablingHandler This is necessary to allow cross-origin requests.
 func GetCorsDisablingHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		w.Header().Set("Access-Control-Allow-Credentials", "true")
 		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Authorization")
-		if r.Method == "OPTIONS" { // TODO can be removed I think
-			w.WriteHeader(http.StatusOK)
-			return
-		}
 		next.ServeHTTP(w, r)
 	})
 }
