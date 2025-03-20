@@ -14,6 +14,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -29,6 +30,7 @@ type SingleInteger struct {
 	Value int `json:"value"`
 }
 
+// TODO to be removed
 type ChangePasswordForm struct {
 	OldPassword string `json:"old_password"`
 	NewPassword string `json:"new_password"`
@@ -58,7 +60,7 @@ type ComponentClient struct {
 	VerifyCertificate bool
 }
 
-func (c *ComponentClient) DoRequest(path string, payload interface{}, expectedMessage string) (interface{}, error) {
+func (c *ComponentClient) DoRequest(path string, payload interface{}, expectedMessage string) ([]byte, error) {
 	resp, err := c.DoRequestWithFullResponse(path, payload, expectedMessage)
 	if err != nil {
 		return nil, err
@@ -358,4 +360,18 @@ func unzipToDir(zipBytes []byte, dest string) error {
 		outFile.Close()
 	}
 	return nil
+}
+
+func ExecuteShellCommand(shellCommand string) error {
+	return exec.Command("/bin/sh", "-c", shellCommand).Run()
+}
+
+func Execute(commandStr string) {
+	commandParts := strings.Split(commandStr, " ")
+	command := exec.Command(commandParts[0], commandParts[1:]...)
+	err := command.Run()
+	if err != nil {
+		fmt.Printf("Error executing docker command: %v\n", err)
+		os.Exit(1)
+	}
 }
