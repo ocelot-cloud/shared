@@ -208,6 +208,10 @@ func SaltAndHash(clearText string) (string, error) {
 	return string(hashValue), nil
 }
 
+func DoesMatchSaltedHash(clearText, saltedHash string) bool {
+	return bcrypt.CompareHashAndPassword([]byte(saltedHash), []byte(clearText)) == nil
+}
+
 func Hash(clearText string) (string, error) {
 	hashValue := sha256.New()
 	_, err := hashValue.Write([]byte(clearText))
