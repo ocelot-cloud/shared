@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
+	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -47,13 +48,14 @@ func SendJsonResponse(w http.ResponseWriter, data interface{}) {
 }
 
 type ComponentClient struct {
-	User            string
-	Password        string
-	NewPassword     string
-	Cookie          *http.Cookie
-	SetCookieHeader bool
-	RootUrl         string
-	Origin          string
+	User              string
+	Password          string
+	NewPassword       string
+	Cookie            *http.Cookie
+	SetCookieHeader   bool
+	RootUrl           string
+	Origin            string
+	VerifyCertificate bool
 }
 
 func (c *ComponentClient) DoRequest(path string, payload interface{}, expectedMessage string) (interface{}, error) {
@@ -88,7 +90,11 @@ func (c *ComponentClient) DoRequestWithFullResponse(path string, payload interfa
 		req.Header.Set("Origin", c.Origin)
 	}
 
-	client := &http.Client{}
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: !c.VerifyCertificate},
+		},
+	}
 	resp, err := client.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("Failed to send request: %v", err)
