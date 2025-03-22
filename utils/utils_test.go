@@ -63,3 +63,8 @@ func TestGenerateCookie(t *testing.T) {
 	assert.True(t, cookie.Expires.After(time.Now()))
 	assert.True(t, cookie.Expires.Before(time.Now().Add(31*24*time.Hour)))
 }
+
+func TestFindDir(t *testing.T) {
+	dir := FindDir("utils")
+	assert.Equal(t, "utils", filepath.Base(dir))
+}
