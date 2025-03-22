@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"crypto/tls"
+	"database/sql"
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
@@ -417,4 +418,30 @@ func RunMigrations(migrationsDir, host string) {
 	if err != nil && err != migrate.ErrNoChange {
 		Logger.Fatal("Migration failed: %v", err)
 	}
+}
+
+func WaitForPostgresDb(host string) (*sql.DB, error) {
+	var err error
+	var dbClient *sql.DB
+	counter := 0
+	attempts := 30
+	for {
+		counter++
+		if counter >= attempts {
+			return nil, fmt.Errorf("Failed to connect to database: %v", err)
+		}
+
+		dataSourceName := fmt.Sprintf("host=%s user=postgres dbname=postgres sslmode=disable", host)
+		dbClient, err = sql.Open("postgres", dataSourceName)
+		if err == nil {
+			err = dbClient.Ping()
+			if err == nil {
+				break // DB is ready
+			}
+		}
+
+		Logger.Info("Waiting for postgres database at host '%s' to be ready... (%d/%d)", host, counter, attempts)
+		time.Sleep(1 * time.Second)
+	}
+	return dbClient, nil
 }
