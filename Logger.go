@@ -3,6 +3,7 @@ package shared
 import (
 	"fmt"
 	"github.com/rs/zerolog"
+	"gopkg.in/natefinch/lumberjack.v2"
 	"os"
 	"strings"
 	"time"
@@ -68,9 +69,17 @@ func (l logLevelValue) String() string {
 
 func ProvideLogger(logLevel string) Logger {
 	setLogLevel(logLevel)
-	logFile, err := os.OpenFile("data/logs.txt", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		panic("Failed to open log file")
+	logDir := "data/logs"
+	if err := os.MkdirAll(logDir, os.ModePerm); err != nil {
+		panic(fmt.Sprintf("Failed to create logs directory: %v", err))
+	}
+
+	logFile := &lumberjack.Logger{
+		Filename:   logDir + "/app.log",
+		MaxSize:    100, // megabytes
+		MaxBackups: 0,   // unlimited
+		MaxAge:     30,  // days
+		Compress:   true,
 	}
 
 	multi := zerolog.MultiLevelWriter(
