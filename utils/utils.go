@@ -9,6 +9,10 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
 	"github.com/ocelot-cloud/shared"
 	"golang.org/x/crypto/bcrypt"
 	"io"
@@ -398,5 +402,19 @@ func FindDir(dirName string) string {
 		}
 
 		currentDir = parentDir
+	}
+}
+
+func RunMigrations(migrationsDir, host string) {
+	m, err := migrate.New(
+		"file://"+migrationsDir,
+		fmt.Sprintf("postgres://postgres@%s:5432/postgres?sslmode=disable", host),
+	)
+	if err != nil {
+		Logger.Fatal("Migration init failed: %v", err)
+	}
+	err = m.Up()
+	if err != nil && err != migrate.ErrNoChange {
+		Logger.Fatal("Migration failed: %v", err)
 	}
 }
