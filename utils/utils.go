@@ -387,6 +387,7 @@ func Execute(commandStr string) {
 
 func FindDir(dirName string) string {
 	currentDir, err := os.Getwd()
+	initialDir := currentDir
 	if err != nil {
 		Logger.Fatal("Failed to get current dir: %v", err)
 	}
@@ -399,7 +400,7 @@ func FindDir(dirName string) string {
 
 		parentDir := filepath.Dir(currentDir)
 		if parentDir == currentDir { // Reached root folder
-			Logger.Fatal("Assets folder not found in any parent directory")
+			Logger.Fatal("folder '%s' not found in any parent directory. Initial directory was: %s", dirName, initialDir)
 		}
 
 		currentDir = parentDir
