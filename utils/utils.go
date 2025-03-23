@@ -406,10 +406,10 @@ func FindDir(dirName string) string {
 	}
 }
 
-func RunMigrations(migrationsDir, host string) {
+func RunMigrations(migrationsDir, host, port string) {
 	m, err := migrate.New(
 		"file://"+migrationsDir,
-		fmt.Sprintf("postgres://postgres@%s:5432/postgres?sslmode=disable", host),
+		fmt.Sprintf("postgres://postgres@%s:%s/postgres?sslmode=disable", host, port),
 	)
 	if err != nil {
 		Logger.Fatal("Migration init failed: %v", err)
