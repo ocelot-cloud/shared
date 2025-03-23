@@ -420,7 +420,7 @@ func RunMigrations(migrationsDir, host string) {
 	}
 }
 
-func WaitForPostgresDb(host string) (*sql.DB, error) {
+func WaitForPostgresDb(host, port string) (*sql.DB, error) {
 	var err error
 	var dbClient *sql.DB
 	counter := 0
@@ -431,7 +431,7 @@ func WaitForPostgresDb(host string) (*sql.DB, error) {
 			return nil, fmt.Errorf("Failed to connect to database: %v", err)
 		}
 
-		dataSourceName := fmt.Sprintf("host=%s user=postgres dbname=postgres sslmode=disable", host)
+		dataSourceName := fmt.Sprintf("host=%s port=%s user=postgres dbname=postgres sslmode=disable", host, port)
 		dbClient, err = sql.Open("postgres", dataSourceName)
 		if err == nil {
 			err = dbClient.Ping()
