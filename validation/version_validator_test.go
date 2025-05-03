@@ -225,3 +225,7 @@ func TestIsValidURLPath(t *testing.T) {
 		assert.Equal(t, test.expected, IsValidURLPath(test.path))
 	}
 }
+
+func TestDontCrashWhenLoadingSampleVersionBytes(t *testing.T) {
+	assert.True(t, len(GetValidVersionBytes()) > 0)
+}

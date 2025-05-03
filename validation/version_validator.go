@@ -588,3 +588,11 @@ func AssertYamlEquality(t *testing.T, a, b []byte) {
 		t.Fail()
 	}
 }
+
+func GetValidVersionBytes() []byte {
+	versionBytes, err := ZipDirectory(SamplesDir + "/test-compose-files/allow-app-yml")
+	if err != nil {
+		utils.Logger.Fatal("Failed to read sample version file: %v", err)
+	}
+	return versionBytes
+}
