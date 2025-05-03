@@ -16,7 +16,7 @@ var maintainerName = "samplemaintainer"
 var expectedPrefix = "samplemaintainer_gitea_"
 
 func TestMissingDockerComposeYaml(t *testing.T) {
-	zipBytes, err := ZipDirectory(sampleComposeDir + "/missing-compose-yaml")
+	zipBytes, err := ZipDirectory(getSamplesComposeDir() + "/missing-compose-yaml")
 	assert.Nil(t, err)
 	err = ValidateVersion(zipBytes, maintainerName, appName)
 	assert.NotNil(t, err)
@@ -24,14 +24,14 @@ func TestMissingDockerComposeYaml(t *testing.T) {
 }
 
 func TestAllowAppYaml(t *testing.T) {
-	zipBytes, err := ZipDirectory(sampleComposeDir + "/allow-app-yml")
+	zipBytes, err := ZipDirectory(getSamplesComposeDir() + "/allow-app-yml")
 	assert.Nil(t, err)
 	err = ValidateVersion(zipBytes, maintainerName, appName)
 	assert.Nil(t, err)
 }
 
 func TestInvalidAppYaml(t *testing.T) {
-	zipBytes, err := ZipDirectory(sampleComposeDir + "/invalid-app-yml")
+	zipBytes, err := ZipDirectory(getSamplesComposeDir() + "/invalid-app-yml")
 	assert.Nil(t, err)
 	err = ValidateVersion(zipBytes, maintainerName, appName)
 	assert.NotNil(t, err)
@@ -39,7 +39,7 @@ func TestInvalidAppYaml(t *testing.T) {
 }
 
 func TestExtraFile(t *testing.T) {
-	zipBytes, err := ZipDirectory(sampleComposeDir + "/extra-file")
+	zipBytes, err := ZipDirectory(getSamplesComposeDir() + "/extra-file")
 	assert.Nil(t, err)
 	err = ValidateVersion(zipBytes, maintainerName, appName)
 	assert.NotNil(t, err)
@@ -47,7 +47,7 @@ func TestExtraFile(t *testing.T) {
 }
 
 func TestExtraDir(t *testing.T) {
-	zipBytes, err := ZipDirectory(sampleComposeDir + "/extra-dir")
+	zipBytes, err := ZipDirectory(getSamplesComposeDir() + "/extra-dir")
 	assert.Nil(t, err)
 	err = ValidateVersion(zipBytes, maintainerName, appName)
 	assert.NotNil(t, err)
@@ -124,7 +124,7 @@ func TestValidation(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.file, func(t *testing.T) {
-			zipBytes, err := createZipWithComposeFile(sampleComposeDir, tc.file)
+			zipBytes, err := createZipWithComposeFile(getSamplesComposeDir(), tc.file)
 			if err != nil {
 				t.Fatalf("Failed to create ZIP archive: %v", err)
 			}

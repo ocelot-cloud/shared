@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	samplesDir       string
-	sampleComposeDir = getSamplesDir() + "/test-compose-files"
+	samplesDir        string
+	samplesComposeDir string
 
 	notAllowedTopLevelKeyword                 = "not allowed root keyword in docker-compose.yml: %s"
 	notAllowedKeyInService                    = "not allowed key in service '%s': %s"
@@ -45,6 +45,13 @@ func getSamplesDir() string {
 		samplesDir = utils.FindDir("samples")
 	}
 	return samplesDir
+}
+
+func getSamplesComposeDir() string {
+	if samplesComposeDir == "" {
+		samplesComposeDir = getSamplesDir() + "/test-compose-files"
+	}
+	return samplesComposeDir
 }
 
 func ValidateVersion(zipBytes []byte, maintainerName, appName string) error {
