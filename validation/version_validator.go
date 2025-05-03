@@ -18,8 +18,8 @@ import (
 )
 
 var (
-	SamplesDir       = utils.FindDir("samples")
-	sampleComposeDir = SamplesDir + "/test-compose-files"
+	samplesDir       string
+	sampleComposeDir = getSamplesDir() + "/test-compose-files"
 
 	notAllowedTopLevelKeyword                 = "not allowed root keyword in docker-compose.yml: %s"
 	notAllowedKeyInService                    = "not allowed key in service '%s': %s"
@@ -39,6 +39,13 @@ var (
 	wrongContainerNamePrefix                  = "the container names must have the prefix: %s"
 	containerNameMissing                      = "every service needs to have a 'container_name' keyword"
 )
+
+func getSamplesDir() string {
+	if samplesDir == "" {
+		samplesDir = utils.FindDir("samples")
+	}
+	return samplesDir
+}
 
 func ValidateVersion(zipBytes []byte, maintainerName, appName string) error {
 	if appName == "ocelotcloud" || appName == "ocelotdb" {
@@ -587,12 +594,4 @@ func AssertYamlEquality(t *testing.T, a, b []byte) {
 		fmt.Printf("\n\nSECOND YAML: \n\n%v\n", string(b))
 		t.Fail()
 	}
-}
-
-func GetValidVersionBytes() []byte {
-	versionBytes, err := ZipDirectory(SamplesDir + "/test-compose-files/allow-app-yml")
-	if err != nil {
-		utils.Logger.Fatal("Failed to read sample version file: %v", err)
-	}
-	return versionBytes
 }

@@ -170,10 +170,10 @@ func copyFile(src, dst string) error {
 
 func TestCompleteDockerComposeYaml(t *testing.T) {
 	defer tr.Remove("input.yml")
-	tr.Copy(SamplesDir+"/yaml-keyword-completion", "input.yml", ".")
+	tr.Copy(getSamplesDir()+"/yaml-keyword-completion", "input.yml", ".")
 	err := CompleteDockerComposeYaml("samplemaintainer", "gitea", "input.yml")
 	assert.Nil(t, err)
-	expectedBytes, err := os.ReadFile(SamplesDir + "/yaml-keyword-completion/expected-output.yml")
+	expectedBytes, err := os.ReadFile(getSamplesDir() + "/yaml-keyword-completion/expected-output.yml")
 	assert.Nil(t, err)
 	actualBytes, err := os.ReadFile("input.yml")
 	assert.Nil(t, err)
@@ -195,7 +195,7 @@ func TestCheckAppYamlCorrectness(t *testing.T) {
 	for _, tc := range testCases {
 		tc := tc
 		t.Run(tc.file, func(t *testing.T) {
-			err := checkAppYamlCorrectness(SamplesDir + "/app-yamls/" + tc.file + ".yml")
+			err := checkAppYamlCorrectness(getSamplesDir() + "/app-yamls/" + tc.file + ".yml")
 			if tc.expectedError == "" {
 				assert.Nil(t, err)
 			} else {
@@ -224,8 +224,4 @@ func TestIsValidURLPath(t *testing.T) {
 	for _, test := range tests {
 		assert.Equal(t, test.expected, IsValidURLPath(test.path))
 	}
-}
-
-func TestDontCrashWhenLoadingSampleVersionBytes(t *testing.T) {
-	assert.True(t, len(GetValidVersionBytes()) > 0)
 }
