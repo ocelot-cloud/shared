@@ -81,11 +81,33 @@ func TestUnzipToDirLimit(t *testing.T) {
 	_, err := f.Write(bytes.Repeat([]byte("A"), 100))
 	assert.Nil(t, err)
 	Close(zw)
-	
-	err = unzipToDir(buf.Bytes(), tempDir, 101)
+
+	err = unzipToDir(buf.Bytes(), tempDir, 1, 101)
 	assert.Nil(t, err)
 
-	err = unzipToDir(buf.Bytes(), tempDir, 99)
+	err = unzipToDir(buf.Bytes(), tempDir, 1, 99)
 	assert.NotNil(t, err)
 	assert.Equal(t, "unpacked data exceeds limit", err.Error())
+}
+
+func TestUnzipToDirFileCountLimit(t *testing.T) {
+	tempDir := t.TempDir()
+	defer RemoveDir(tempDir)
+
+	buf := new(bytes.Buffer)
+	zw := zip.NewWriter(buf)
+	f1, _ := zw.Create("a.txt")
+	_, err := f1.Write([]byte("A"))
+	assert.Nil(t, err)
+	f2, _ := zw.Create("b.txt")
+	_, err = f2.Write([]byte("B"))
+	assert.Nil(t, err)
+	Close(zw)
+
+	err = unzipToDir(buf.Bytes(), tempDir, 2, 99)
+	assert.Nil(t, err)
+
+	err = unzipToDir(buf.Bytes(), tempDir, 1, 99)
+	assert.NotNil(t, err)
+	assert.Equal(t, "too many files in zip: 2, max allowed: 1", err.Error())
 }

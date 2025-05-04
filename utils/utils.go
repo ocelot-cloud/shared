@@ -314,7 +314,10 @@ func UnpackResponse[T any](object interface{}) (*T, error) {
 	return &result, nil
 }
 
-var maximumAllowedUnpackedBytesFromZip = int64(10 * 1024 * 1024) // 10 MB
+var (
+	maxNumberOfFilesAllowed            = 100
+	maximumAllowedUnpackedBytesFromZip = int64(10 * 1024 * 1024) // 10 MB
+)
 
 // UnzipToTempDir unzips the given zip bytes to a temporary directory and returns the path to the directory.
 func UnzipToTempDir(zipBytes []byte) (string, error) {
@@ -322,7 +325,7 @@ func UnzipToTempDir(zipBytes []byte) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return tempDir, unzipToDir(zipBytes, tempDir, maximumAllowedUnpackedBytesFromZip)
+	return tempDir, unzipToDir(zipBytes, tempDir, maxNumberOfFilesAllowed, maximumAllowedUnpackedBytesFromZip)
 }
 
 func createTempDir() (string, error) {
@@ -332,13 +335,17 @@ func createTempDir() (string, error) {
 	}
 	return tempDir, nil
 }
-func unzipToDir(zipBytes []byte, dest string, maxUnpackedBytesFromZip int64) error {
+
+func unzipToDir(zipBytes []byte, dest string, maxNumberOfFilesAllowed int, maxUnpackedBytesFromZip int64) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(zipBytes), int64(len(zipBytes)))
 	if err != nil {
 		return fmt.Errorf("failed to read zip file: %v", err)
 	}
 
 	var totalUnpacked int64
+	if len(zipReader.File) > maxNumberOfFilesAllowed {
+		return fmt.Errorf("too many files in zip: %d, max allowed: %d", len(zipReader.File), maxNumberOfFilesAllowed)
+	}
 
 	for _, file := range zipReader.File {
 		if strings.Contains(file.Name, "..") {
