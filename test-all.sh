@@ -5,7 +5,7 @@ set -e
 PROJECT_DIR="$(pwd)"
 
 cd "$PROJECT_DIR/main"
-bash test.sh
+go run .
 
 cd "$PROJECT_DIR/utils"
 go test .
