@@ -314,14 +314,15 @@ func UnpackResponse[T any](object interface{}) (*T, error) {
 	return &result, nil
 }
 
-// TODO To be tested
+var maximumAllowedUnpackedBytesFromZip = int64(10 * 1024 * 1024) // 10 MB
+
 // UnzipToTempDir unzips the given zip bytes to a temporary directory and returns the path to the directory.
 func UnzipToTempDir(zipBytes []byte) (string, error) {
 	tempDir, err := createTempDir()
 	if err != nil {
 		return "", err
 	}
-	return tempDir, unzipToDir(zipBytes, tempDir)
+	return tempDir, unzipToDir(zipBytes, tempDir, maximumAllowedUnpackedBytesFromZip)
 }
 
 func createTempDir() (string, error) {
@@ -331,52 +332,69 @@ func createTempDir() (string, error) {
 	}
 	return tempDir, nil
 }
-
-func unzipToDir(zipBytes []byte, dest string) error {
+func unzipToDir(zipBytes []byte, dest string, maxUnpackedBytesFromZip int64) error {
 	zipReader, err := zip.NewReader(bytes.NewReader(zipBytes), int64(len(zipBytes)))
 	if err != nil {
 		return fmt.Errorf("failed to read zip file: %v", err)
 	}
+
+	var totalUnpacked int64
 
 	for _, file := range zipReader.File {
 		if strings.Contains(file.Name, "..") {
 			return fmt.Errorf("invalid file path in zip: %s", file.Name)
 		}
 
-		fpath := filepath.Join(dest, file.Name) // #nosec G305 (CWE-22): File traversal when extracting zip/tar archive; no problem since file paths are created internally
-		if file.FileInfo().IsDir() {
-			if err := os.MkdirAll(fpath, 0700); err != nil {
-				return fmt.Errorf("failed to create directory: %v", err)
-			}
-			continue
+		if err := extractFile(file, dest, &totalUnpacked, maxUnpackedBytesFromZip); err != nil {
+			return err
 		}
-
-		if err := os.MkdirAll(filepath.Dir(fpath), 0700); err != nil {
-			return fmt.Errorf("failed to create directory: %v", err)
-		}
-
-		rc, err := file.Open()
-		if err != nil {
-			return fmt.Errorf("failed to open file in zip: %v", err)
-		}
-
-		outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode()) // #nosec G304 (CWE-22): Potential file inclusion via variable; but required by design
-		if err != nil {
-			Close(rc)
-			return fmt.Errorf("failed to open file: %v", err)
-		}
-
-		// #nosec G110 (CWE-409): Potential DoS vulnerability via decompression bomb; but App Store checks for potential zip bombs during upload
-		if _, err := io.Copy(outFile, rc); err != nil {
-			Close(rc)
-			Close(outFile)
-			return fmt.Errorf("failed to copy file: %v", err)
-		}
-
-		Close(rc)
-		Close(outFile)
 	}
 	return nil
+}
+
+func extractFile(file *zip.File, dest string, totalUnpacked *int64, limit int64) error {
+	fpath := filepath.Join(dest, file.Name) // #nosec G305 (CWE-22): File traversal when extracting zip/tar archive; safe due to sanitized internal file paths
+
+	if file.FileInfo().IsDir() {
+		return os.MkdirAll(fpath, 0700)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(fpath), 0700); err != nil {
+		return err
+	}
+
+	rc, err := file.Open()
+	if err != nil {
+		return err
+	}
+	defer Close(rc)
+
+	outFile, err := os.OpenFile(fpath, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode()) // #nosec G304 (CWE-22): File inclusion via variable path; controlled and expected
+	if err != nil {
+		return err
+	}
+	defer Close(outFile)
+
+	// #nosec G110 (CWE-409): DoS risk via zip bomb mitigated by max unpack limit
+	_, err = io.Copy(outFile, limitedCounter{rc, totalUnpacked, limit})
+	return err
+}
+
+type limitedCounter struct {
+	r     io.Reader
+	total *int64
+	limit int64
+}
+
+func (lc limitedCounter) Read(p []byte) (int, error) {
+	n, err := lc.r.Read(p)
+	if n > 0 {
+		if *lc.total+int64(n) > lc.limit {
+			return 0, fmt.Errorf("unpacked data exceeds limit")
+		}
+		*lc.total += int64(n)
+	}
+	return n, err
 }
 
 func ExecuteShellCommand(shellCommand string) error {

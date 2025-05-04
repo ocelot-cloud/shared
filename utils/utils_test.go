@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"archive/zip"
+	"bytes"
 	"github.com/ocelot-cloud/shared/assert"
 	"net/http"
 	"os"
@@ -67,4 +69,23 @@ func TestGenerateCookie(t *testing.T) {
 func TestFindDir(t *testing.T) {
 	dir := FindDir("utils")
 	assert.Equal(t, "utils", filepath.Base(dir))
+}
+
+func TestUnzipToDirLimit(t *testing.T) {
+	tempDir := t.TempDir()
+	defer RemoveDir(tempDir)
+
+	buf := new(bytes.Buffer)
+	zw := zip.NewWriter(buf)
+	f, _ := zw.Create("file.txt")
+	_, err := f.Write(bytes.Repeat([]byte("A"), 100))
+	assert.Nil(t, err)
+	Close(zw)
+	
+	err = unzipToDir(buf.Bytes(), tempDir, 101)
+	assert.Nil(t, err)
+
+	err = unzipToDir(buf.Bytes(), tempDir, 99)
+	assert.NotNil(t, err)
+	assert.Equal(t, "unpacked data exceeds limit", err.Error())
 }
