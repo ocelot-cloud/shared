@@ -1,0 +1,14 @@
+name: 'Setup and Build Environment'
+description: 'Sets up environment and builds the Go application'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.24.1'
+        cache: true
+        cache-dependency-path: go.sum
