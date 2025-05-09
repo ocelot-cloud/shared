@@ -24,25 +24,48 @@ var validationTypeMap = map[string]string{
 }
 
 func ValidateStruct(s interface{}) error {
-	field := reflect.ValueOf(s)
-	if field.Kind() == reflect.Ptr {
-		field = field.Elem()
-	}
-	fieldType := field.Type()
+	reflectionObject := getReflectionObject(s)
+	fieldType := reflectionObject.Type()
 
-	if field.Kind() != reflect.Struct {
-		return fmt.Errorf("input must be a data structure, but was: %s", field.Kind())
+	if reflectionObject.Kind() == reflect.Array || reflectionObject.Kind() == reflect.Slice {
+		for i := 0; i < reflectionObject.Len(); i++ {
+			elem := reflectionObject.Index(i)
+
+			/*TODO add dereferenciation?
+			if elem.Kind() == reflect.Ptr {
+				elem = elem.Elem()
+			}
+			*/
+			if elem.Kind() == reflect.Struct {
+				if err := ValidateStruct(elem.Interface()); err != nil {
+					return err
+				}
+			}
+		}
+		return nil
 	}
 
-	for i := 0; i < field.NumField(); i++ {
-		fieldValue := field.Field(i)
-		structField := fieldType.Field(i)
-		err := validateField(fieldValue, structField)
+	if reflectionObject.Kind() != reflect.Struct {
+		return fmt.Errorf("input must be a data structure, but was: %s", reflectionObject.Kind())
+	}
+
+	for i := 0; i < reflectionObject.NumField(); i++ {
+		fieldValue := reflectionObject.Field(i)
+		reflectedStructureField := fieldType.Field(i)
+		err := validateField(fieldValue, reflectedStructureField)
 		if err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func getReflectionObject(s interface{}) reflect.Value {
+	object := reflect.ValueOf(s)
+	for object.Kind() == reflect.Ptr && !object.IsNil() {
+		object = object.Elem()
+	}
+	return object
 }
 
 func validateField(field reflect.Value, structField reflect.StructField) error {
