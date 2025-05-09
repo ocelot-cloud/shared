@@ -79,8 +79,10 @@ func TestValidateStruct(t *testing.T) {
 
 		{"valid array of structs", [2]validStruct{{"ocelotcloud"}, {"another"}}, ""},
 		{"valid slice of structs", []validStruct{{"ocelotcloud"}, {"another"}}, ""},
-		// TODO invalid arrays/slices
-		// TODO slice of pointers
+		{"valid array of pointer structs", [2]pointerString{{&sampleString}, {&sampleString}}, ""},
+		{"valid slice of pointer structs", []pointerString{{&sampleString}, {&sampleString}}, ""},
+		{"invalid array of pointer structs", [2]pointerString{{&sampleString}, {nil}}, "pointer field is nil: Value"},
+		{"invalid slice of pointer structs", []pointerString{{&sampleString}, {nil}}, "pointer field is nil: Value"},
 	}
 
 	for _, tc := range testCases {

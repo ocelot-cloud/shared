@@ -30,12 +30,6 @@ func ValidateStruct(s interface{}) error {
 	if reflectionObject.Kind() == reflect.Array || reflectionObject.Kind() == reflect.Slice {
 		for i := 0; i < reflectionObject.Len(); i++ {
 			elem := reflectionObject.Index(i)
-
-			/*TODO add dereferenciation?
-			if elem.Kind() == reflect.Ptr {
-				elem = elem.Elem()
-			}
-			*/
 			if elem.Kind() == reflect.Struct {
 				if err := ValidateStruct(elem.Interface()); err != nil {
 					return err
