@@ -105,7 +105,9 @@ func TestValidateStruct(t *testing.T) {
 		{"valid string array struct", stringSliceStruct{[]string{"ocelotcloud", "another"}}, ""},
 		{"maps are not allowed as fields", stringMapStruct{map[string]string{"one": "ocelotcloud", "two": "another"}}, "map fields are not allowed: Value"},
 
-		{"invalid string array struct", stringSliceStruct{[]string{"ocelotcloud", "another!!"}}, "field does not match regex: Value"},
+		{"invalid string array struct", stringArrayStruct{[2]string{"ocelotcloud", "another!!"}}, "field does not match regex: Value"},
+		{"invalid string slice struct", stringSliceStruct{[]string{"ocelotcloud", "another!!"}}, "field does not match regex: Value"},
+
 		// TODO slices of nested data structures; same but with pointers
 	}
 
