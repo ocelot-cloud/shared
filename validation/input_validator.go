@@ -27,18 +27,6 @@ func ValidateStruct(s interface{}) error {
 	reflectionObject := getReflectionObject(s)
 	fieldType := reflectionObject.Type()
 
-	if reflectionObject.Kind() == reflect.Array || reflectionObject.Kind() == reflect.Slice {
-		for i := 0; i < reflectionObject.Len(); i++ {
-			elem := reflectionObject.Index(i)
-			if elem.Kind() == reflect.Struct {
-				if err := ValidateStruct(elem.Interface()); err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}
-
 	if reflectionObject.Kind() != reflect.Struct {
 		return fmt.Errorf("input must be a data structure, but was: %s", reflectionObject.Kind())
 	}
@@ -72,6 +60,9 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 			return fmt.Errorf("pointer field is nil: %s", structField.Name)
 		} else {
 			field = field.Elem()
+			if field.Kind() == reflect.Ptr {
+				return fmt.Errorf("field is double pointer: %s", structField.Name)
+			}
 		}
 	}
 

@@ -45,10 +45,15 @@ type invalidPointerString struct {
 	Value *string `validate:"unknown-type"`
 }
 
+type doublePointerString struct {
+	Value **string `validate:"USER_NAME"`
+}
+
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
 
 func TestValidateStruct(t *testing.T) {
 	sampleString := "ocelotcloud"
+	sampleStringPointer := &sampleString
 
 	testCases := []struct {
 		name            string
@@ -77,12 +82,11 @@ func TestValidateStruct(t *testing.T) {
 
 		{"invalid nil pointer field", pointerString{nil}, "pointer field is nil: Value"},
 
-		{"valid array of structs", [2]validStruct{{"ocelotcloud"}, {"another"}}, ""},
-		{"valid slice of structs", []validStruct{{"ocelotcloud"}, {"another"}}, ""},
-		{"valid array of pointer structs", [2]pointerString{{&sampleString}, {&sampleString}}, ""},
-		{"valid slice of pointer structs", []pointerString{{&sampleString}, {&sampleString}}, ""},
-		{"invalid array of pointer structs", [2]pointerString{{&sampleString}, {nil}}, "pointer field is nil: Value"},
-		{"invalid slice of pointer structs", []pointerString{{&sampleString}, {nil}}, "pointer field is nil: Value"},
+		{"valid array of structs", [2]validStruct{{"ocelotcloud"}, {"another"}}, "input must be a data structure, but was: array"},
+		{"valid slice of structs", []validStruct{{"ocelotcloud"}, {"another"}}, "input must be a data structure, but was: slice"},
+
+		{"invalid double pointer string", doublePointerString{&sampleStringPointer}, "field is double pointer: Value"},
+		// TODO slices of nested data structures; same but with pointers
 	}
 
 	for _, tc := range testCases {
