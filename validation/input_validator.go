@@ -6,19 +6,20 @@ import (
 	"regexp"
 )
 
-type ValidationType string
-
 // TODO ensure usernames, appnames and version do not contain underscores, maybe add extra test and comment that this is important for formatting
 // TODO explicitly dont allow dots in usernames, appnames and version names
 // TODO add extra tests for these regexes
 var ValidationTypeMap = map[string]*regexp.Regexp{
-	"USER_NAME":    regexp.MustCompile("^[a-zA-Z0-9]{3,20}$"),
-	"APP_NAME":     regexp.MustCompile("^[a-zA-Z0-9-]{3,20}$"), // TODO should allow hyphens
-	"VERSION_NAME": regexp.MustCompile("^[a-zA-Z0-9.]{3,20}$"),
+	"USER_NAME":    regexp.MustCompile("^[a-z0-9]{3,20}$"),
+	"APP_NAME":     regexp.MustCompile("^[a-z0-9-]{3,20}$"), // TODO should allow hyphens
+	"VERSION_NAME": regexp.MustCompile("^[a-z0-9.]{3,20}$"),
 	"SEARCH_TERM":  regexp.MustCompile("^[a-z0-9]{0,20}$"),
 	"PASSWORD":     regexp.MustCompile("^[a-zA-Z0-9!@#$%&_,.?]{8,30}$"), // TODO allow more than that?
 	// TODO anything else? -> known hosts, ports, host names and ip addresses, (cookies, ValidationCode and secrets? not requests bodies, maybe separate validation function), email,
 	"INTEGER": regexp.MustCompile("^[0-9]{1,30}$"), // relevant for ID's
+	"COOKIE":  regexp.MustCompile("^[a-f0-9]{64}$"),
+	"EMAIL":   regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
+	"NUMBER":  regexp.MustCompile("^[0-9]{1,20}$"),
 }
 
 func ValidateStruct(s interface{}) error {
@@ -130,6 +131,24 @@ func validateString(field reflect.Value, structField reflect.StructField) error 
 	}
 
 	return nil
+}
+
+func Validate(input, validationType string) error {
+	regex, found := ValidationTypeMap[validationType]
+	if !found {
+		return fmt.Errorf("unknown validation type: %s", validationType)
+	}
+
+	if validationType == "EMAIL" && len(input) > 64 {
+		return fmt.Errorf("invalid input")
+	}
+
+	result := regex.MatchString(input)
+	if result {
+		return nil
+	} else {
+		return fmt.Errorf("invalid input")
+	}
 }
 
 // TODO also add a readBody function which both modules can use, which internally does the input validation.
