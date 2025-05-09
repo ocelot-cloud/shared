@@ -69,6 +69,14 @@ type stringPointerSliceStruct struct {
 	Value []*string `validate:"USER_NAME"`
 }
 
+type arrayOfNestedDataStructures struct {
+	Value [1]nestedValidStructure
+}
+
+type sliceOfNestedDataStructures struct {
+	Value []nestedValidStructure
+}
+
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
 // TODO re-check whether "invalid" tests cases should trigger a "field does not match regex" error
 
@@ -119,6 +127,11 @@ func TestValidateStruct(t *testing.T) {
 		{"don't allow string point array fields", stringPointerArrayStruct{[2]*string{&sampleString, &sampleString}}, "field of array or slice of pointers found: Value"},
 		{"don't allow string point slice fields", stringPointerSliceStruct{[]*string{&sampleString, &sampleString}}, "field of array or slice of pointers found: Value"},
 
+		{"valid array of nested data structures", arrayOfNestedDataStructures{[1]nestedValidStructure{{validStruct{"ocelotcloud"}}}}, ""},
+		{"valid slice of nested data structures", sliceOfNestedDataStructures{[]nestedValidStructure{{validStruct{"ocelotcloud"}}}}, ""},
+
+		{"invalid array of nested data structures", arrayOfNestedDataStructures{[1]nestedValidStructure{{validStruct{"!!!"}}}}, "field does not match regex: Value"},
+		{"invalid slice of nested data structures", sliceOfNestedDataStructures{[]nestedValidStructure{{validStruct{"!!!"}}}}, "field does not match regex: Value"},
 		// TODO slices of nested data structures; same but with pointers
 	}
 

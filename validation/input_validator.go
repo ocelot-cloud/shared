@@ -95,9 +95,19 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 func validateArrayOrSlice(field reflect.Value, structField reflect.StructField) error {
 	if field.Type().Elem().Kind() == reflect.Ptr {
 		return fmt.Errorf("field of array or slice of pointers found: %s", structField.Name)
-	} else if field.Type().Elem().Kind() == reflect.String {
+	}
+
+	if field.Type().Elem().Kind() == reflect.String {
 		for i := 0; i < field.Len(); i++ {
 			if err := validateString(field.Index(i), structField); err != nil {
+				return err
+			}
+		}
+	}
+
+	if field.Type().Elem().Kind() == reflect.Struct {
+		for i := 0; i < field.Len(); i++ {
+			if err := ValidateStruct(field.Index(i).Interface()); err != nil {
 				return err
 			}
 		}
