@@ -20,6 +20,7 @@ var validationTypeMap = map[string]string{
 	"SEARCH_TERM":  "^[a-zA-Z0-9-]{0,20}$",
 	"PASSWORD":     "^[a-zA-Z0-9-]{8,30}$", // TODO allow more than that?
 	// TODO anything else? -> known hosts, ports, host names and ip addresses, (cookies and secrets? not requests bodies, maybe separate validation function)
+	"INTEGER": "^[0-9]{1,30}$", // relevant for ID's
 }
 
 func ValidateStruct(s interface{}) error {

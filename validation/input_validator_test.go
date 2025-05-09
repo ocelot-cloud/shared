@@ -29,6 +29,10 @@ type nestedInvalidStructure struct {
 	SomeTag unknownTag
 }
 
+type nestedPointerStructure struct {
+	SomeTag *validStruct
+}
+
 type ignoreNumberFields struct {
 	SomeNumber int
 }
@@ -42,6 +46,9 @@ func TestValidateStruct(t *testing.T) {
 		expectedMessage string
 	}{
 		{"valid struct", validStruct{"ocelotcloud"}, ""},
+		{"valid struct as pointer", &validStruct{"ocelotcloud"}, ""},
+		// TODO {"valid struct with nested pointer structure", nestedPointerStructure{&validStruct{"ocelotcloud"}}, ""},
+
 		{"no validation tag", noValidationTag{"asdf"}, "no validation tag found for field: Value"},
 		{"unknown validation tag", unknownTag{"asdf"}, "unknown validation type: unknown-type"},
 		{"non-public field", nonPublicField{"asdf"}, "cannot validate non-public fields: value"},
