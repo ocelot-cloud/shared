@@ -50,6 +50,14 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 		return fmt.Errorf("cannot validate non-public fields: %s", structField.Name)
 	}
 
+	if field.Kind() == reflect.Ptr {
+		if field.IsNil() {
+			return fmt.Errorf("pointer field %s is nil", structField.Name)
+		} else {
+			field = field.Elem()
+		}
+	}
+
 	if field.Kind() == reflect.String {
 		err := validateString(field, structField)
 		if err != nil {
@@ -58,6 +66,7 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 	}
 
 	if field.Kind() == reflect.Struct {
+
 		if err := ValidateStruct(field.Interface()); err != nil {
 			return err
 		}

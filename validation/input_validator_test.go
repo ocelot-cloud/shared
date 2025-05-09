@@ -37,17 +37,25 @@ type ignoreNumberFields struct {
 	SomeNumber int
 }
 
+type pointerString struct {
+	Value *string `validate:"USER_NAME"`
+}
+
+type invalidPointerString struct {
+	Value *string `validate:"unknown-type"`
+}
+
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
 
 func TestValidateStruct(t *testing.T) {
+	sampleString := "ocelotcloud"
+
 	testCases := []struct {
 		name            string
 		input           interface{}
 		expectedMessage string
 	}{
 		{"valid struct", validStruct{"ocelotcloud"}, ""},
-		{"valid struct as pointer", &validStruct{"ocelotcloud"}, ""},
-		{"valid struct with nested pointer structure", nestedPointerStructure{&validStruct{"ocelotcloud"}}, ""},
 
 		{"no validation tag", noValidationTag{"asdf"}, "no validation tag found for field: Value"},
 		{"unknown validation tag", unknownTag{"asdf"}, "unknown validation type: unknown-type"},
@@ -58,11 +66,16 @@ func TestValidateStruct(t *testing.T) {
 
 		{"string input fails", "some-string", "input must be a data structure, but was: string"},
 		{"float input fails", 1.23, "input must be a data structure, but was: float64"},
-		{"integer input fails", 123, "input must be a data structure, but was: integer"},
+		{"integer input fails", 123, "input must be a data structure, but was: int"},
 
 		{"ignore fields which are neither strings nor structs", ignoreNumberFields{123}, ""},
 
-		// TODO 1) input of pointer of field, 2) input of struct with pointer field (maybe even nested structure)?
+		{"valid struct as pointer", &validStruct{"ocelotcloud"}, ""},
+		{"valid struct with nested pointer structure", nestedPointerStructure{&validStruct{"ocelotcloud"}}, ""},
+		{"valid struct with pointer string", pointerString{&sampleString}, ""},
+		{"invalid struct with pointer string", invalidPointerString{&sampleString}, "unknown validation type: unknown-type"},
+
+		// TODO case: nested nil value
 	}
 
 	for _, tc := range testCases {
