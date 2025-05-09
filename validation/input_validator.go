@@ -8,12 +8,15 @@ import (
 
 type ValidationType int
 
+// TODO ensure usernames, appnames and version do not contain underscores, maybe add extra test and comment that this is important for formatting
+
 const (
 	USER_NAME ValidationType = iota
-	APP_NAME
+	APP_NAME                 // TODO should allow hyphens
 	VERSION_NAME
 	SEARCH_TERM
-	// TODO anything else?
+	PASSWORD
+	// TODO anything else? -> known hosts, ports, host names and ip addresses, ...
 )
 
 // TODO just dummy stuff, re-check, and test
@@ -40,7 +43,11 @@ func ValidateStruct(s interface{}) error {
 		}
 
 		tag := structField.Tag.Get("validate")
-		if tag != "" && field.Kind() == reflect.String {
+		if tag == "" {
+			return fmt.Errorf("no validation tag found for field: %s", structField.Name)
+		}
+
+		if field.Kind() == reflect.String {
 			matched, _ := regexp.MatchString(tag, field.String())
 			if !matched {
 				return fmt.Errorf("field %s does not match regex", structField.Name)
@@ -60,7 +67,7 @@ func ValidateStruct(s interface{}) error {
 * simplify input validation by using my "reflection" approach. Does this in store first.
   * also check nested structures, slices, arrays, nil, maps, pointers, simple string input (should cause error since its no data structure?) etc.
   * other types than string needed to be checked?
-  * fail if a string field was found which does not have "validate" tag, or when its value is empty, should be a regex
+  * fail if a string field was found which does not have "validate" tag, or when its value is empty, it should be a regex
   * can I use constants as tags? if not, maybe do sth like "validate:user", and the validate function checks -> if x == "user" then validate it for user regex; unknown validation type should throw error
   * also add a readBody function which both modules can use, which internally does the input validation.
 */

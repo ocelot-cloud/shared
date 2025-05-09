@@ -6,8 +6,10 @@ import (
 	"testing"
 )
 
+// TODO I think SingleString will become deprecated then so it can be deleted afterwards.
+
 func TestValidateStruct(t *testing.T) {
-	assertStructValidation(t, utils.SingleString{"asdf"}, "")
+	assertStructValidation(t, utils.SingleString{"asdf"}, "no validation tag found for field: Value")
 }
 
 func assertStructValidation(t *testing.T, structure interface{}, expectedMessage string) {
