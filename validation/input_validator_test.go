@@ -10,7 +10,7 @@ type noValidationTag struct {
 }
 
 type noRegexTag struct {
-	Value string `validate:"^"`
+	Value string `validate:"a(b"`
 }
 
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
@@ -22,7 +22,7 @@ func TestValidateStruct(t *testing.T) {
 		expectedMessage string
 	}{
 		{"no validation tag", noValidationTag{"asdf"}, "no validation tag found for field: Value"},
-		// TODO {"no regex in validation tag", noRegexTag{"asdf"}, "validation tag is not a regex for field: Value"},
+		{"no regex in validation tag", noRegexTag{"asdf"}, "validation failed"},
 	}
 
 	for _, tc := range testCases {

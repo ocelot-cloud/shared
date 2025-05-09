@@ -2,6 +2,7 @@ package validation
 
 import (
 	"fmt"
+	"github.com/ocelot-cloud/shared/utils"
 	"reflect"
 	"regexp"
 )
@@ -18,7 +19,7 @@ var validationTypeMap = map[string]string{
 	"VERSION_NAME": "^[a-zA-Z0-9.]{3,20}$",
 	"SEARCH_TERM":  "^[a-zA-Z0-9-]{0,20}$",
 	"PASSWORD":     "^[a-zA-Z0-9-]{8,30}$",
-	// TODO anything else? -> known hosts, ports, host names and ip addresses, ...
+	// TODO anything else? -> known hosts, ports, host names and ip addresses, (cookies and secrets? not requests bodies, maybe separate validation function)
 }
 
 func ValidateStruct(s interface{}) error {
@@ -44,7 +45,12 @@ func ValidateStruct(s interface{}) error {
 		}
 
 		if field.Kind() == reflect.String {
-			matched, _ := regexp.MatchString(tag, field.String())
+			fieldString := field.String() // extra variable for debugging
+			matched, err := regexp.MatchString(tag, fieldString)
+			if err != nil {
+				utils.Logger.Error("error for field validation '%s' when matching regex: %v ", structField.Name, err)
+				return fmt.Errorf("validation failed")
+			}
 			if !matched {
 				return fmt.Errorf("field %s does not match regex", structField.Name)
 			}
