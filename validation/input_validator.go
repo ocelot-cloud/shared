@@ -39,25 +39,10 @@ func ValidateStruct(s interface{}) error {
 		}
 		*/
 
-		tag := structField.Tag.Get("validate")
-		if tag == "" {
-			return fmt.Errorf("no validation tag found for field: %s", structField.Name)
-		}
-
 		if field.Kind() == reflect.String {
-			fieldString := field.String() // extra variable for debugging
-			regex, found := validationTypeMap[tag]
-			if !found {
-				return fmt.Errorf("unknown validation type: %s", tag)
-			}
-
-			matched, err := regexp.MatchString(regex, fieldString)
+			err := validateString(field, structField)
 			if err != nil {
-				utils.Logger.Error("error for field validation '%s' when matching regex: %v ", structField.Name, err)
-				return fmt.Errorf("validation failed")
-			}
-			if !matched {
-				return fmt.Errorf("field %s does not match regex", structField.Name)
+				return err
 			}
 		}
 
@@ -70,9 +55,33 @@ func ValidateStruct(s interface{}) error {
 	return nil
 }
 
+func validateString(field reflect.Value, structField reflect.StructField) error {
+	tag := structField.Tag.Get("validate")
+	if tag == "" {
+		return fmt.Errorf("no validation tag found for field: %s", structField.Name)
+	}
+
+	regex, found := validationTypeMap[tag]
+	if !found {
+		return fmt.Errorf("unknown validation type: %s", tag)
+	}
+
+	fieldString := field.String() // extra variable to see its content when debugging
+	matched, err := regexp.MatchString(regex, fieldString)
+	if err != nil {
+		utils.Logger.Error("error for field validation '%s' when matching regex: %v ", structField.Name, err)
+		return fmt.Errorf("validation failed")
+	}
+	if !matched {
+		return fmt.Errorf("field %s does not match regex", structField.Name)
+	}
+
+	return nil
+}
+
 /* TODO
 * simplify input validation by using my "reflection" approach. Does this in store first.
-  * also check nested structures, slices, arrays, nil, maps, pointers, simple string input (should cause error since its no data structure?) etc.
+  * also check nested structures/interfaces, slices, arrays, nil, maps, pointers, simple string input (should cause error since its no data structure?) etc.
   * other types than string needed to be checked?
   * fail if a string field was found which does not have "validate" tag, or when its value is empty, it should be a regex
   * can I use constants as tags? if not, maybe do sth like "validate:user", and the validate function checks -> if x == "user" then validate it for user regex; unknown validation type should throw error
