@@ -52,7 +52,7 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 
 	if field.Kind() == reflect.Ptr {
 		if field.IsNil() {
-			return fmt.Errorf("pointer field %s is nil", structField.Name)
+			return fmt.Errorf("pointer field is nil: %s", structField.Name)
 		} else {
 			field = field.Elem()
 		}

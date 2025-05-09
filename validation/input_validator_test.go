@@ -75,7 +75,7 @@ func TestValidateStruct(t *testing.T) {
 		{"valid struct with pointer string", pointerString{&sampleString}, ""},
 		{"invalid struct with pointer string", invalidPointerString{&sampleString}, "unknown validation type: unknown-type"},
 
-		// TODO case: nested nil value
+		{"invalid nil pointer field", pointerString{nil}, "pointer field is nil: Value"},
 	}
 
 	for _, tc := range testCases {
