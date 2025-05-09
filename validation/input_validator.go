@@ -15,7 +15,7 @@ var ValidationTypeMap = map[string]*regexp.Regexp{
 	"app_name":     regexp.MustCompile("^[a-z0-9-]{3,20}$"),
 	"version_name": regexp.MustCompile("^[a-z0-9.]{3,20}$"),
 	"search_term":  regexp.MustCompile("^[a-z0-9]{0,20}$"),
-	"password":     regexp.MustCompile("^[a-zA-Z0-9!@#$%&_,.?]{8,30}$"),
+	"password":     regexp.MustCompile("^[a-zA-Z0-9._-]{8,30}$"),
 	"email":        regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
 	"number":       regexp.MustCompile("^[0-9]{1,20}$"),
 }

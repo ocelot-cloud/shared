@@ -41,10 +41,11 @@ func TestValidateVersion(t *testing.T) {
 }
 
 func TestValidatePassword(t *testing.T) {
-	assert.Nil(t, validate("validpassword!", "password"))
+	assert.Nil(t, validate("validpassword._-", "password"))
+	assert.NotNil(t, validate("validpassword!", "password"))
 	assert.Nil(t, validate("valid_pass123", "password"))
 	assert.Nil(t, validate("InvalidPassword", "password")) // Contains uppercase
-	assert.Nil(t, validate("valid!@#", "password"))        // Contains special characters
+	assert.NotNil(t, validate("valid!@#", "password"))     // Contains special characters
 	assert.NotNil(t, validate("1234567", "password"))      // Too short
 	assert.Nil(t, validate("12345678", "password"))
 	assert.NotNil(t, validate("thispasswordiswaytoolong_xxxxx!", "password")) // Too long
