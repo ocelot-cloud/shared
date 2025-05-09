@@ -85,7 +85,7 @@ type sliceOfNestedDataStructuresPointers struct {
 	Value []nestedPointerStructure
 }
 
-type sampleInterface interface {
+type SampleInterface interface {
 	SampleFunction()
 }
 
@@ -93,9 +93,13 @@ type validSampleInterfaceImplementationStructure struct {
 	SampleField string `validate:"USER_NAME"`
 }
 
+func (v validSampleInterfaceImplementationStructure) SampleFunction() {}
+
 type invalidSampleInterfaceImplementationStructure struct {
 	SampleField string
 }
+
+func (v invalidSampleInterfaceImplementationStructure) SampleFunction() {}
 
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
 // TODO re-check whether "invalid" tests cases should trigger a "field does not match regex" error
@@ -104,8 +108,8 @@ func TestValidateStruct(t *testing.T) {
 	sampleString := "ocelotcloud"
 	sampleStringPointer := &sampleString
 
-	validSampleInterfaceImplementation := validSampleInterfaceImplementationStructure{SampleField: "ocelotcloud"}
-	invalidSampleInterfaceImplementation := invalidSampleInterfaceImplementationStructure{SampleField: "ocelotcloud"}
+	var validSampleInterfaceImplementation SampleInterface = &validSampleInterfaceImplementationStructure{SampleField: "ocelotcloud"}
+	var invalidSampleInterfaceImplementation SampleInterface = &invalidSampleInterfaceImplementationStructure{SampleField: "ocelotcloud"}
 
 	testCases := []struct {
 		name            string
