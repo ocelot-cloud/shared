@@ -77,6 +77,14 @@ type sliceOfNestedDataStructures struct {
 	Value []nestedValidStructure
 }
 
+type arrayOfNestedDataStructuresPointers struct {
+	Value [1]nestedPointerStructure
+}
+
+type sliceOfNestedDataStructuresPointers struct {
+	Value []nestedPointerStructure
+}
+
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
 // TODO re-check whether "invalid" tests cases should trigger a "field does not match regex" error
 
@@ -132,7 +140,9 @@ func TestValidateStruct(t *testing.T) {
 
 		{"invalid array of nested data structures", arrayOfNestedDataStructures{[1]nestedValidStructure{{validStruct{"!!!"}}}}, "field does not match regex: Value"},
 		{"invalid slice of nested data structures", sliceOfNestedDataStructures{[]nestedValidStructure{{validStruct{"!!!"}}}}, "field does not match regex: Value"},
-		// TODO slices of nested data structures; same but with pointers
+
+		{"invalid array of nested data structures", arrayOfNestedDataStructuresPointers{[1]nestedPointerStructure{{&validStruct{"!!!"}}}}, "field does not match regex: Value"},
+		{"invalid slice of nested data structures", sliceOfNestedDataStructuresPointers{[]nestedPointerStructure{{&validStruct{"!!!"}}}}, "field does not match regex: Value"},
 	}
 
 	for _, tc := range testCases {
