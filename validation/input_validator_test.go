@@ -49,7 +49,12 @@ type doublePointerString struct {
 	Value **string `validate:"USER_NAME"`
 }
 
+type stringArrayStruct struct {
+	Value []string `validate:"USER_NAME"`
+}
+
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
+// TODO re-check whether "invalid" tests cases should trigger a "field does not match regex" error
 
 func TestValidateStruct(t *testing.T) {
 	sampleString := "ocelotcloud"
@@ -86,6 +91,9 @@ func TestValidateStruct(t *testing.T) {
 		{"valid slice of structs", []validStruct{{"ocelotcloud"}, {"another"}}, "input must be a data structure, but was: slice"},
 
 		{"invalid double pointer string", doublePointerString{&sampleStringPointer}, "field is double pointer: Value"},
+
+		{"valid string array struct", stringArrayStruct{[]string{"ocelotcloud", "another"}}, ""},
+		{"invalid string array struct", stringArrayStruct{[]string{"ocelotcloud", "another!!"}}, "field does not match regex: Value"},
 		// TODO slices of nested data structures; same but with pointers
 	}
 

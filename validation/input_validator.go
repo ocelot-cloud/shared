@@ -73,8 +73,18 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 		}
 	}
 
-	if field.Kind() == reflect.Struct {
+	// TODO add test for map
+	if field.Kind() == reflect.Array || field.Kind() == reflect.Slice || field.Kind() == reflect.Map {
+		if field.Type().Elem().Kind() == reflect.String {
+			for i := 0; i < field.Len(); i++ {
+				if err := validateString(field.Index(i), structField); err != nil {
+					return err
+				}
+			}
+		}
+	}
 
+	if field.Kind() == reflect.Struct {
 		if err := ValidateStruct(field.Interface()); err != nil {
 			return err
 		}
@@ -100,7 +110,7 @@ func validateString(field reflect.Value, structField reflect.StructField) error 
 		return fmt.Errorf("validation failed")
 	}
 	if !matched {
-		return fmt.Errorf("field %s does not match regex", structField.Name)
+		return fmt.Errorf("field does not match regex: %s", structField.Name)
 	}
 
 	return nil
