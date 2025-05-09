@@ -7,9 +7,13 @@ import (
 	"os/exec"
 )
 
+type SingleString struct {
+	Value string `json:"value"`
+}
+
 func main() {
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-		data := utils.SingleString{Value: "pong"}
+		data := SingleString{Value: "pong"}
 		utils.SendJsonResponse(w, data)
 	})
 	utils.Logger.Info("Listening on port 8080")

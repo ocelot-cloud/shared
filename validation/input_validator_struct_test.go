@@ -101,9 +101,6 @@ type invalidSampleInterfaceImplementationStructure struct {
 
 func (v invalidSampleInterfaceImplementationStructure) SampleFunction() {}
 
-// TODO I think SingleString will become deprecated then so it can be deleted afterwards.
-// TODO re-check whether "invalid" tests cases should trigger a "field does not match regex" error
-
 func TestValidateStruct(t *testing.T) {
 	sampleString := "ocelotcloud"
 	sampleStringPointer := &sampleString

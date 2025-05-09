@@ -16,7 +16,7 @@ func TestPing(t *testing.T) {
 		t.Fatalf("Error making request: %v", err)
 	}
 
-	var responseString utils.SingleString
+	var responseString SingleString
 	err = json.Unmarshal(respBody, &responseString)
 	assert.Nil(t, err)
 	assert.Equal(t, "pong", responseString.Value)
