@@ -29,6 +29,10 @@ type nestedInvalidStructure struct {
 	SomeTag unknownTag
 }
 
+type ignoreNumberFields struct {
+	SomeNumber int
+}
+
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
 
 func TestValidateStruct(t *testing.T) {
@@ -47,6 +51,8 @@ func TestValidateStruct(t *testing.T) {
 
 		{"string input fails", "some-string", "input must be a data structure, but was: string"},
 		{"float input fails", 1.23, "input must be a data structure, but was: string"},
+
+		{"ignore fields which are neither strings nor structs", ignoreNumberFields{123}, ""},
 	}
 
 	for _, tc := range testCases {
