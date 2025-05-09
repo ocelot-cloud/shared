@@ -6,7 +6,7 @@ import (
 )
 
 type validStruct struct {
-	Value string `validate:"USER_NAME"`
+	Value string `validate:"user_name"`
 }
 
 type noValidationTag struct {
@@ -14,7 +14,7 @@ type noValidationTag struct {
 }
 
 type nonPublicField struct {
-	value string `validate:"USER_NAME"`
+	value string `validate:"user_name"`
 }
 
 type unknownTag struct {
@@ -38,7 +38,7 @@ type ignoreNumberFields struct {
 }
 
 type pointerString struct {
-	Value *string `validate:"USER_NAME"`
+	Value *string `validate:"user_name"`
 }
 
 type invalidPointerString struct {
@@ -46,27 +46,27 @@ type invalidPointerString struct {
 }
 
 type doublePointerString struct {
-	Value **string `validate:"USER_NAME"`
+	Value **string `validate:"user_name"`
 }
 
 type stringArrayStruct struct {
-	Value [2]string `validate:"USER_NAME"`
+	Value [2]string `validate:"user_name"`
 }
 
 type stringSliceStruct struct {
-	Value []string `validate:"USER_NAME"`
+	Value []string `validate:"user_name"`
 }
 
 type stringMapStruct struct {
-	Value map[string]string `validate:"USER_NAME"`
+	Value map[string]string `validate:"user_name"`
 }
 
 type stringPointerArrayStruct struct {
-	Value [2]*string `validate:"USER_NAME"`
+	Value [2]*string `validate:"user_name"`
 }
 
 type stringPointerSliceStruct struct {
-	Value []*string `validate:"USER_NAME"`
+	Value []*string `validate:"user_name"`
 }
 
 type arrayOfNestedDataStructures struct {
@@ -90,7 +90,7 @@ type SampleInterface interface {
 }
 
 type validSampleInterfaceImplementationStructure struct {
-	SampleField string `validate:"USER_NAME"`
+	SampleField string `validate:"user_name"`
 }
 
 func (v validSampleInterfaceImplementationStructure) SampleFunction() {}

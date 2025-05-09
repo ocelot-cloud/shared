@@ -7,47 +7,47 @@ import (
 )
 
 func TestValidateUserName(t *testing.T) {
-	assert.Nil(t, validate("validusername", "USER_NAME"))
-	assert.Nil(t, validate("user123", "USER_NAME"))
-	assert.NotNil(t, validate("user.123", "USER_NAME"))
-	assert.NotNil(t, validate("user-123", "USER_NAME"))
-	assert.NotNil(t, validate("user_123", "USER_NAME"))
-	assert.NotNil(t, validate("InvalidUsername", "USER_NAME"))          // Contains uppercase
-	assert.NotNil(t, validate("user!@#", "USER_NAME"))                  // Contains special characters
-	assert.NotNil(t, validate("us", "USER_NAME"))                       // Too short
-	assert.NotNil(t, validate("thisusernameiswaytoolong", "USER_NAME")) // Too long
+	assert.Nil(t, validate("validusername", "user_name"))
+	assert.Nil(t, validate("user123", "user_name"))
+	assert.NotNil(t, validate("user.123", "user_name"))
+	assert.NotNil(t, validate("user-123", "user_name"))
+	assert.NotNil(t, validate("user_123", "user_name"))
+	assert.NotNil(t, validate("InvalidUsername", "user_name"))          // Contains uppercase
+	assert.NotNil(t, validate("user!@#", "user_name"))                  // Contains special characters
+	assert.NotNil(t, validate("us", "user_name"))                       // Too short
+	assert.NotNil(t, validate("thisusernameiswaytoolong", "user_name")) // Too long
 }
 
 func TestValidateAppName(t *testing.T) {
-	assert.Nil(t, validate("validappname", "APP_NAME"))
-	assert.Nil(t, validate("app123", "APP_NAME"))
-	assert.Nil(t, validate("app-123", "APP_NAME"))
-	assert.NotNil(t, validate("app_123", "APP_NAME"))
-	assert.NotNil(t, validate("app.123", "APP_NAME"))
-	assert.NotNil(t, validate("InvalidAppName", "APP_NAME"))          // Contains uppercase
-	assert.NotNil(t, validate("app!@#", "APP_NAME"))                  // Contains special characters
-	assert.NotNil(t, validate("ap", "APP_NAME"))                      // Too short
-	assert.NotNil(t, validate("thisappnameiswaytoolong", "APP_NAME")) // Too long
+	assert.Nil(t, validate("validappname", "app_name"))
+	assert.Nil(t, validate("app123", "app_name"))
+	assert.Nil(t, validate("app-123", "app_name"))
+	assert.NotNil(t, validate("app_123", "app_name"))
+	assert.NotNil(t, validate("app.123", "app_name"))
+	assert.NotNil(t, validate("InvalidAppName", "app_name"))          // Contains uppercase
+	assert.NotNil(t, validate("app!@#", "app_name"))                  // Contains special characters
+	assert.NotNil(t, validate("ap", "app_name"))                      // Too short
+	assert.NotNil(t, validate("thisappnameiswaytoolong", "app_name")) // Too long
 }
 
 func TestValidateVersion(t *testing.T) {
-	assert.Nil(t, validate("valid.versionname", "VERSION_NAME"))
-	assert.Nil(t, validate("version123", "VERSION_NAME"))
-	assert.Nil(t, validate("version.name123", "VERSION_NAME"))
-	assert.NotNil(t, validate("version_name123", "VERSION_NAME"))
-	assert.NotNil(t, validate("invalid.versionname!", "VERSION_NAME"))             // Contains special characters other than dot
-	assert.NotNil(t, validate("ta", "VERSION_NAME"))                               // Too short
-	assert.NotNil(t, validate("this.versionname.is.way.too.long", "VERSION_NAME")) // Too long
+	assert.Nil(t, validate("valid.versionname", "version_name"))
+	assert.Nil(t, validate("version123", "version_name"))
+	assert.Nil(t, validate("version.name123", "version_name"))
+	assert.NotNil(t, validate("version_name123", "version_name"))
+	assert.NotNil(t, validate("invalid.versionname!", "version_name"))             // Contains special characters other than dot
+	assert.NotNil(t, validate("ta", "version_name"))                               // Too short
+	assert.NotNil(t, validate("this.versionname.is.way.too.long", "version_name")) // Too long
 }
 
 func TestValidatePassword(t *testing.T) {
-	assert.Nil(t, validate("validpassword!", "PASSWORD"))
-	assert.Nil(t, validate("valid_pass123", "PASSWORD"))
-	assert.Nil(t, validate("InvalidPassword", "PASSWORD")) // Contains uppercase
-	assert.Nil(t, validate("valid!@#", "PASSWORD"))        // Contains special characters
-	assert.NotNil(t, validate("1234567", "PASSWORD"))      // Too short
-	assert.Nil(t, validate("12345678", "PASSWORD"))
-	assert.NotNil(t, validate("thispasswordiswaytoolong_xxxxx!", "PASSWORD")) // Too long
+	assert.Nil(t, validate("validpassword!", "password"))
+	assert.Nil(t, validate("valid_pass123", "password"))
+	assert.Nil(t, validate("InvalidPassword", "password")) // Contains uppercase
+	assert.Nil(t, validate("valid!@#", "password"))        // Contains special characters
+	assert.NotNil(t, validate("1234567", "password"))      // Too short
+	assert.Nil(t, validate("12345678", "password"))
+	assert.NotNil(t, validate("thispasswordiswaytoolong_xxxxx!", "password")) // Too long
 }
 
 func TestValidateCookie(t *testing.T) {
@@ -61,42 +61,42 @@ func TestValidateCookie(t *testing.T) {
 }
 
 func TestValidateEmail(t *testing.T) {
-	assert.Nil(t, validate("admin@admin.com", "EMAIL"))
-	assert.NotNil(t, validate("@admin.com", "EMAIL"))
-	assert.NotNil(t, validate("admin@.com", "EMAIL"))
-	assert.NotNil(t, validate("admin@admin.", "EMAIL"))
-	assert.NotNil(t, validate("adminadmin.com", "EMAIL"))
-	assert.NotNil(t, validate("admin@admincom", "EMAIL"))
+	assert.Nil(t, validate("admin@admin.com", "email"))
+	assert.NotNil(t, validate("@admin.com", "email"))
+	assert.NotNil(t, validate("admin@.com", "email"))
+	assert.NotNil(t, validate("admin@admin.", "email"))
+	assert.NotNil(t, validate("adminadmin.com", "email"))
+	assert.NotNil(t, validate("admin@admincom", "email"))
 
 	thirtyCharacters := "abcdefghijklmnopqrstuvwxyz1234"
 	validEmail := fmt.Sprintf("%s@%s.de", thirtyCharacters, thirtyCharacters)
-	assert.Nil(t, validate(validEmail, "EMAIL"))
+	assert.Nil(t, validate(validEmail, "email"))
 	tooLongEmail := fmt.Sprintf("%s@%s.com", thirtyCharacters, thirtyCharacters)
-	assert.NotNil(t, validate(tooLongEmail, "EMAIL"))
+	assert.NotNil(t, validate(tooLongEmail, "email"))
 }
 
 func TestValidateNumber(t *testing.T) {
-	assert.Nil(t, validate("0", "NUMBER"))
-	assert.Nil(t, validate("1", "NUMBER"))
-	assert.NotNil(t, validate("-1", "NUMBER"))
-	assert.NotNil(t, validate("a", "NUMBER"))
-	assert.NotNil(t, validate("A", "NUMBER"))
-	assert.NotNil(t, validate("z", "NUMBER"))
-	assert.NotNil(t, validate("Z", "NUMBER"))
-	assert.NotNil(t, validate("-", "NUMBER"))
-	assert.NotNil(t, validate("_", "NUMBER"))
-	assert.NotNil(t, validate(".", "NUMBER"))
-	assert.NotNil(t, validate(",", "NUMBER"))
+	assert.Nil(t, validate("0", "number"))
+	assert.Nil(t, validate("1", "number"))
+	assert.NotNil(t, validate("-1", "number"))
+	assert.NotNil(t, validate("a", "number"))
+	assert.NotNil(t, validate("A", "number"))
+	assert.NotNil(t, validate("z", "number"))
+	assert.NotNil(t, validate("Z", "number"))
+	assert.NotNil(t, validate("-", "number"))
+	assert.NotNil(t, validate("_", "number"))
+	assert.NotNil(t, validate(".", "number"))
+	assert.NotNil(t, validate(",", "number"))
 
 	twentyDigitNumber := "01234567890123456789"
-	assert.Nil(t, validate(twentyDigitNumber, "NUMBER"))
-	assert.NotNil(t, validate(twentyDigitNumber+"0", "NUMBER"))
+	assert.Nil(t, validate(twentyDigitNumber, "number"))
+	assert.NotNil(t, validate(twentyDigitNumber+"0", "number"))
 }
 
 func TestSearchTerm(t *testing.T) {
-	assert.Nil(t, validate("", "SEARCH_TERM"))
-	assert.Nil(t, validate("a", "SEARCH_TERM"))
-	assert.Nil(t, validate("1", "SEARCH_TERM"))
-	assert.Nil(t, validate("0123456789abcdefghij", "SEARCH_TERM"))
-	assert.NotNil(t, validate("asdf!", "SEARCH_TERM"))
+	assert.Nil(t, validate("", "search_term"))
+	assert.Nil(t, validate("a", "search_term"))
+	assert.Nil(t, validate("1", "search_term"))
+	assert.Nil(t, validate("0123456789abcdefghij", "search_term"))
+	assert.NotNil(t, validate("asdf!", "search_term"))
 }

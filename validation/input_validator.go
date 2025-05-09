@@ -11,13 +11,13 @@ import (
 )
 
 var ValidationTypeMap = map[string]*regexp.Regexp{
-	"USER_NAME":    regexp.MustCompile("^[a-z0-9]{3,20}$"),
-	"APP_NAME":     regexp.MustCompile("^[a-z0-9-]{3,20}$"),
-	"VERSION_NAME": regexp.MustCompile("^[a-z0-9.]{3,20}$"),
-	"SEARCH_TERM":  regexp.MustCompile("^[a-z0-9]{0,20}$"),
-	"PASSWORD":     regexp.MustCompile("^[a-zA-Z0-9!@#$%&_,.?]{8,30}$"),
-	"EMAIL":        regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
-	"NUMBER":       regexp.MustCompile("^[0-9]{1,20}$"),
+	"user_name":    regexp.MustCompile("^[a-z0-9]{3,20}$"),
+	"app_name":     regexp.MustCompile("^[a-z0-9-]{3,20}$"),
+	"version_name": regexp.MustCompile("^[a-z0-9.]{3,20}$"),
+	"search_term":  regexp.MustCompile("^[a-z0-9]{0,20}$"),
+	"password":     regexp.MustCompile("^[a-zA-Z0-9!@#$%&_,.?]{8,30}$"),
+	"email":        regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
+	"number":       regexp.MustCompile("^[0-9]{1,20}$"),
 }
 
 func ValidateStruct(s interface{}) error {
@@ -137,7 +137,7 @@ func validate(input, validationType string) error {
 		return fmt.Errorf("unknown validation type: %s", validationType)
 	}
 
-	if validationType == "EMAIL" && len(input) > 64 {
+	if validationType == "email" && len(input) > 64 {
 		return fmt.Errorf("invalid input")
 	}
 

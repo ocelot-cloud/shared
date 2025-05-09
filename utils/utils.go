@@ -30,20 +30,6 @@ import (
 
 var Logger = ProvideLogger(os.Getenv("LOG_LEVEL"))
 
-type SingleString struct {
-	Value string `json:"value"`
-}
-
-type SingleInteger struct {
-	Value int `json:"value"`
-}
-
-// TODO to be removed
-type ChangePasswordForm struct {
-	OldPassword string `json:"old_password"`
-	NewPassword string `json:"new_password"`
-}
-
 func SendJsonResponse(w http.ResponseWriter, data interface{}) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
