@@ -21,8 +21,12 @@ type unknownTag struct {
 	Value string `validate:"unknown-type"`
 }
 
-type nestedStructure struct {
-	someTag unknownTag
+type nestedValidStructure struct {
+	SomeTag validStruct
+}
+
+type nestedInvalidStructure struct {
+	SomeTag unknownTag
 }
 
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
@@ -37,7 +41,9 @@ func TestValidateStruct(t *testing.T) {
 		{"no validation tag", noValidationTag{"asdf"}, "no validation tag found for field: Value"},
 		{"unknown validation tag", unknownTag{"asdf"}, "unknown validation type: unknown-type"},
 		{"non-public field", nonPublicField{"asdf"}, "cannot validate non-public fields: value"},
-		//{"nested structure", nestedStructure{unknownTag{"asdf"}}, "unknown validation type: unknown-type"},
+
+		{"nested valid structure", nestedValidStructure{validStruct{"asdf"}}, ""},
+		{"nested invalid structure", nestedInvalidStructure{unknownTag{"asdf"}}, "unknown validation type: unknown-type"},
 	}
 
 	for _, tc := range testCases {
