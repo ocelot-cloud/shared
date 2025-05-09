@@ -46,7 +46,12 @@ func ValidateStruct(s interface{}) error {
 
 		if field.Kind() == reflect.String {
 			fieldString := field.String() // extra variable for debugging
-			matched, err := regexp.MatchString(tag, fieldString)
+			regex, found := validationTypeMap[tag]
+			if !found {
+				return fmt.Errorf("unknown validation type: %s", tag)
+			}
+
+			matched, err := regexp.MatchString(regex, fieldString)
 			if err != nil {
 				utils.Logger.Error("error for field validation '%s' when matching regex: %v ", structField.Name, err)
 				return fmt.Errorf("validation failed")

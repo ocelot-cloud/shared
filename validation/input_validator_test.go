@@ -5,12 +5,16 @@ import (
 	"testing"
 )
 
+type validStruct struct {
+	Value string `validate:"USER_NAME"`
+}
+
 type noValidationTag struct {
 	Value string
 }
 
-type noRegexTag struct {
-	Value string `validate:"a(b"`
+type unknownTag struct {
+	Value string `validate:"unknown-type"`
 }
 
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
@@ -21,8 +25,9 @@ func TestValidateStruct(t *testing.T) {
 		input           interface{}
 		expectedMessage string
 	}{
+		{"valid struct", validStruct{"ocelotcloud"}, ""},
 		{"no validation tag", noValidationTag{"asdf"}, "no validation tag found for field: Value"},
-		{"no regex in validation tag", noRegexTag{"asdf"}, "validation failed"},
+		{"unknown validation tag", unknownTag{"asdf"}, "unknown validation type: unknown-type"},
 	}
 
 	for _, tc := range testCases {
