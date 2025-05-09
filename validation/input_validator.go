@@ -11,13 +11,13 @@ type ValidationType string
 // TODO ensure usernames, appnames and version do not contain underscores, maybe add extra test and comment that this is important for formatting
 // TODO explicitly dont allow dots in usernames, appnames and version names
 // TODO add extra tests for these regexes
-var validationTypeMap = map[string]*regexp.Regexp{
+var ValidationTypeMap = map[string]*regexp.Regexp{
 	"USER_NAME":    regexp.MustCompile("^[a-zA-Z0-9]{3,20}$"),
 	"APP_NAME":     regexp.MustCompile("^[a-zA-Z0-9-]{3,20}$"), // TODO should allow hyphens
 	"VERSION_NAME": regexp.MustCompile("^[a-zA-Z0-9.]{3,20}$"),
-	"SEARCH_TERM":  regexp.MustCompile("^[a-zA-Z0-9-]{0,20}$"),
-	"PASSWORD":     regexp.MustCompile("^[a-zA-Z0-9-]{8,30}$"), // TODO allow more than that?
-	// TODO anything else? -> known hosts, ports, host names and ip addresses, (cookies and secrets? not requests bodies, maybe separate validation function)
+	"SEARCH_TERM":  regexp.MustCompile("^[a-z0-9]{0,20}$"),
+	"PASSWORD":     regexp.MustCompile("^[a-zA-Z0-9!@#$%&_,.?]{8,30}$"), // TODO allow more than that?
+	// TODO anything else? -> known hosts, ports, host names and ip addresses, (cookies, ValidationCode and secrets? not requests bodies, maybe separate validation function), email,
 	"INTEGER": regexp.MustCompile("^[0-9]{1,30}$"), // relevant for ID's
 }
 
@@ -119,7 +119,7 @@ func validateString(field reflect.Value, structField reflect.StructField) error 
 		return fmt.Errorf("no validation tag found for field: %s", structField.Name)
 	}
 
-	regex, found := validationTypeMap[tag]
+	regex, found := ValidationTypeMap[tag]
 	if !found {
 		return fmt.Errorf("unknown validation type: %s", tag)
 	}
