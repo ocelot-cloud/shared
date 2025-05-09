@@ -139,11 +139,4 @@ func validateString(field reflect.Value, structField reflect.StructField) error 
 	return nil
 }
 
-/* TODO
-* simplify input validation by using my "reflection" approach. Does this in store first.
-  * also check nested structures/interfaces, numbers, slices, arrays, nil, maps, pointers, simple string input (should cause error since its no data structure?) etc.
-  * other types than string needed to be checked?
-  * fail if a string field was found which does not have "validate" tag, or when its value is empty, it should be a regex
-  * can I use constants as tags? if not, maybe do sth like "validate:user", and the validate function checks -> if x == "user" then validate it for user regex; unknown validation type should throw error
-  * also add a readBody function which both modules can use, which internally does the input validation.
-*/
+// TODO also add a readBody function which both modules can use, which internally does the input validation.
