@@ -10,7 +10,6 @@ import (
 type ValidationType string
 
 // TODO ensure usernames, appnames and version do not contain underscores, maybe add extra test and comment that this is important for formatting
-
 // TODO explicitly dont allow dots in usernames, appnames and version names
 // TODO add extra tests for these regexes
 var validationTypeMap = map[string]string{

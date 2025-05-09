@@ -113,6 +113,7 @@ func TestValidateStruct(t *testing.T) {
 		expectedMessage string
 	}{
 		{"valid struct", validStruct{"ocelotcloud"}, ""},
+		{"invalid value in valid struct", validStruct{"ocelotcloud!!"}, "field does not match regex: Value"},
 
 		{"no validation tag", noValidationTag{"asdf"}, "no validation tag found for field: Value"},
 		{"unknown validation tag", unknownTag{"asdf"}, "unknown validation type: unknown-type"},
