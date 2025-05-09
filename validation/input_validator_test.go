@@ -50,7 +50,15 @@ type doublePointerString struct {
 }
 
 type stringArrayStruct struct {
+	Value [2]string `validate:"USER_NAME"`
+}
+
+type stringSliceStruct struct {
 	Value []string `validate:"USER_NAME"`
+}
+
+type stringMapStruct struct {
+	Value map[string]string `validate:"USER_NAME"`
 }
 
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
@@ -89,11 +97,15 @@ func TestValidateStruct(t *testing.T) {
 
 		{"valid array of structs", [2]validStruct{{"ocelotcloud"}, {"another"}}, "input must be a data structure, but was: array"},
 		{"valid slice of structs", []validStruct{{"ocelotcloud"}, {"another"}}, "input must be a data structure, but was: slice"},
+		{"valid map of structs", map[string]validStruct{"one": {"ocelotcloud"}, "two": {"another"}}, "input must be a data structure, but was: map"},
 
 		{"invalid double pointer string", doublePointerString{&sampleStringPointer}, "field is double pointer: Value"},
 
-		{"valid string array struct", stringArrayStruct{[]string{"ocelotcloud", "another"}}, ""},
-		{"invalid string array struct", stringArrayStruct{[]string{"ocelotcloud", "another!!"}}, "field does not match regex: Value"},
+		{"valid string array struct", stringArrayStruct{[2]string{"ocelotcloud", "another"}}, ""},
+		{"valid string array struct", stringSliceStruct{[]string{"ocelotcloud", "another"}}, ""},
+		{"maps are not allowed as fields", stringMapStruct{map[string]string{"one": "ocelotcloud", "two": "another"}}, "map fields are not allowed: Value"},
+
+		{"invalid string array struct", stringSliceStruct{[]string{"ocelotcloud", "another!!"}}, "field does not match regex: Value"},
 		// TODO slices of nested data structures; same but with pointers
 	}
 

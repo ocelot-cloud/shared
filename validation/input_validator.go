@@ -66,6 +66,10 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 		}
 	}
 
+	if field.Kind() == reflect.Map {
+		return fmt.Errorf("map fields are not allowed: %s", structField.Name)
+	}
+
 	if field.Kind() == reflect.String {
 		err := validateString(field, structField)
 		if err != nil {
@@ -74,7 +78,8 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 	}
 
 	// TODO add test for map
-	if field.Kind() == reflect.Array || field.Kind() == reflect.Slice || field.Kind() == reflect.Map {
+	// TODO array of pointer strings?
+	if field.Kind() == reflect.Array || field.Kind() == reflect.Slice {
 		if field.Type().Elem().Kind() == reflect.String {
 			for i := 0; i < field.Len(); i++ {
 				if err := validateString(field.Index(i), structField); err != nil {
