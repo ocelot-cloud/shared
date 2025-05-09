@@ -119,3 +119,12 @@ func TestKnownHosts(t *testing.T) {
 	assert.Nil(t, validate(sampleKnownHosts, "known_hosts"))
 	assert.NotNil(t, validate(sampleKnownHosts+"!", "known_hosts"))
 }
+
+func TestResticBackupIdValidations(t *testing.T) {
+	sampleResticBackupId := "06b6458017d1e653195d696653c358e4e6a78772aed17582dd6539287332621f"
+	assert.Nil(t, validate(sampleResticBackupId, "restic_backup_id"))
+	assert.Nil(t, validate(sixtyThreeHexDecimalLetters+"a", "restic_backup_id"))
+
+	assert.NotNil(t, validate(sampleResticBackupId+"a", "restic_backup_id"))
+	assert.NotNil(t, validate(sixtyThreeHexDecimalLetters+"g", "restic_backup_id"))
+}
