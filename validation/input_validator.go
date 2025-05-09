@@ -2,7 +2,6 @@ package validation
 
 import (
 	"fmt"
-	"github.com/ocelot-cloud/shared/utils"
 	"reflect"
 	"regexp"
 )
@@ -12,14 +11,14 @@ type ValidationType string
 // TODO ensure usernames, appnames and version do not contain underscores, maybe add extra test and comment that this is important for formatting
 // TODO explicitly dont allow dots in usernames, appnames and version names
 // TODO add extra tests for these regexes
-var validationTypeMap = map[string]string{
-	"USER_NAME":    "^[a-zA-Z0-9]{3,20}$",
-	"APP_NAME":     "^[a-zA-Z0-9-]{3,20}$", // TODO should allow hyphens
-	"VERSION_NAME": "^[a-zA-Z0-9.]{3,20}$",
-	"SEARCH_TERM":  "^[a-zA-Z0-9-]{0,20}$",
-	"PASSWORD":     "^[a-zA-Z0-9-]{8,30}$", // TODO allow more than that?
+var validationTypeMap = map[string]*regexp.Regexp{
+	"USER_NAME":    regexp.MustCompile("^[a-zA-Z0-9]{3,20}$"),
+	"APP_NAME":     regexp.MustCompile("^[a-zA-Z0-9-]{3,20}$"), // TODO should allow hyphens
+	"VERSION_NAME": regexp.MustCompile("^[a-zA-Z0-9.]{3,20}$"),
+	"SEARCH_TERM":  regexp.MustCompile("^[a-zA-Z0-9-]{0,20}$"),
+	"PASSWORD":     regexp.MustCompile("^[a-zA-Z0-9-]{8,30}$"), // TODO allow more than that?
 	// TODO anything else? -> known hosts, ports, host names and ip addresses, (cookies and secrets? not requests bodies, maybe separate validation function)
-	"INTEGER": "^[0-9]{1,30}$", // relevant for ID's
+	"INTEGER": regexp.MustCompile("^[0-9]{1,30}$"), // relevant for ID's
 }
 
 func ValidateStruct(s interface{}) error {
@@ -126,12 +125,7 @@ func validateString(field reflect.Value, structField reflect.StructField) error 
 	}
 
 	fieldString := field.String() // extra variable to see its content when debugging
-	matched, err := regexp.MatchString(regex, fieldString)
-	if err != nil {
-		utils.Logger.Error("error for field validation '%s' when matching regex: %v ", structField.Name, err)
-		return fmt.Errorf("validation failed")
-	}
-	if !matched {
+	if !regex.MatchString(fieldString) {
 		return fmt.Errorf("field does not match regex: %s", structField.Name)
 	}
 
