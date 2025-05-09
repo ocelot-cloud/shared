@@ -61,6 +61,14 @@ type stringMapStruct struct {
 	Value map[string]string `validate:"USER_NAME"`
 }
 
+type stringPointerArrayStruct struct {
+	Value [2]*string `validate:"USER_NAME"`
+}
+
+type stringPointerSliceStruct struct {
+	Value []*string `validate:"USER_NAME"`
+}
+
 // TODO I think SingleString will become deprecated then so it can be deleted afterwards.
 // TODO re-check whether "invalid" tests cases should trigger a "field does not match regex" error
 
@@ -107,6 +115,9 @@ func TestValidateStruct(t *testing.T) {
 
 		{"invalid string array struct", stringArrayStruct{[2]string{"ocelotcloud", "another!!"}}, "field does not match regex: Value"},
 		{"invalid string slice struct", stringSliceStruct{[]string{"ocelotcloud", "another!!"}}, "field does not match regex: Value"},
+
+		{"don't allow string point array fields", stringPointerArrayStruct{[2]*string{&sampleString, &sampleString}}, "field of array or slice of pointers found: Value"},
+		{"don't allow string point slice fields", stringPointerSliceStruct{[]*string{&sampleString, &sampleString}}, "field of array or slice of pointers found: Value"},
 
 		// TODO slices of nested data structures; same but with pointers
 	}

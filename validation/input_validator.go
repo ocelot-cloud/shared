@@ -77,21 +77,29 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 		}
 	}
 
-	// TODO add test for map
-	// TODO array of pointer strings?
 	if field.Kind() == reflect.Array || field.Kind() == reflect.Slice {
-		if field.Type().Elem().Kind() == reflect.String {
-			for i := 0; i < field.Len(); i++ {
-				if err := validateString(field.Index(i), structField); err != nil {
-					return err
-				}
-			}
+		err := validateArrayOrSlice(field, structField)
+		if err != nil {
+			return err
 		}
 	}
 
 	if field.Kind() == reflect.Struct {
 		if err := ValidateStruct(field.Interface()); err != nil {
 			return err
+		}
+	}
+	return nil
+}
+
+func validateArrayOrSlice(field reflect.Value, structField reflect.StructField) error {
+	if field.Type().Elem().Kind() == reflect.Ptr {
+		return fmt.Errorf("field of array or slice of pointers found: %s", structField.Name)
+	} else if field.Type().Elem().Kind() == reflect.String {
+		for i := 0; i < field.Len(); i++ {
+			if err := validateString(field.Index(i), structField); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
