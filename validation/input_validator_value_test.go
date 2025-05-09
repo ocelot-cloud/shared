@@ -9,16 +9,32 @@ import (
 func TestValidateUserName(t *testing.T) {
 	assert.Nil(t, Validate("validusername", "USER_NAME"))
 	assert.Nil(t, Validate("user123", "USER_NAME"))
+	assert.NotNil(t, Validate("user.123", "USER_NAME"))
+	assert.NotNil(t, Validate("user-123", "USER_NAME"))
+	assert.NotNil(t, Validate("user_123", "USER_NAME"))
 	assert.NotNil(t, Validate("InvalidUsername", "USER_NAME"))          // Contains uppercase
 	assert.NotNil(t, Validate("user!@#", "USER_NAME"))                  // Contains special characters
 	assert.NotNil(t, Validate("us", "USER_NAME"))                       // Too short
 	assert.NotNil(t, Validate("thisusernameiswaytoolong", "USER_NAME")) // Too long
 }
 
+func TestValidateAppName(t *testing.T) {
+	assert.Nil(t, Validate("validappname", "APP_NAME"))
+	assert.Nil(t, Validate("app123", "APP_NAME"))
+	assert.Nil(t, Validate("app-123", "APP_NAME"))
+	assert.NotNil(t, Validate("app_123", "APP_NAME"))
+	assert.NotNil(t, Validate("app.123", "APP_NAME"))
+	assert.NotNil(t, Validate("InvalidAppName", "APP_NAME"))          // Contains uppercase
+	assert.NotNil(t, Validate("app!@#", "APP_NAME"))                  // Contains special characters
+	assert.NotNil(t, Validate("ap", "APP_NAME"))                      // Too short
+	assert.NotNil(t, Validate("thisappnameiswaytoolong", "APP_NAME")) // Too long
+}
+
 func TestValidateVersion(t *testing.T) {
 	assert.Nil(t, Validate("valid.versionname", "VERSION_NAME"))
 	assert.Nil(t, Validate("version123", "VERSION_NAME"))
 	assert.Nil(t, Validate("version.name123", "VERSION_NAME"))
+	assert.NotNil(t, Validate("version_name123", "VERSION_NAME"))
 	assert.NotNil(t, Validate("invalid.versionname!", "VERSION_NAME"))             // Contains special characters other than dot
 	assert.NotNil(t, Validate("ta", "VERSION_NAME"))                               // Too short
 	assert.NotNil(t, Validate("this.versionname.is.way.too.long", "VERSION_NAME")) // Too long
@@ -37,11 +53,11 @@ func TestValidatePassword(t *testing.T) {
 func TestValidateCookie(t *testing.T) {
 	sixtyOneHexDecimalLetters := "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcde"
 
-	assert.NotNil(t, Validate(sixtyOneHexDecimalLetters, "COOKIE"))
-	assert.Nil(t, Validate(sixtyOneHexDecimalLetters+"f", "COOKIE"))
-	assert.NotNil(t, Validate(sixtyOneHexDecimalLetters+"ff", "COOKIE"))
-	assert.NotNil(t, Validate(sixtyOneHexDecimalLetters+"g", "COOKIE"))
-	assert.NotNil(t, Validate("", "COOKIE"))
+	assert.NotNil(t, ValidateSecret(sixtyOneHexDecimalLetters))
+	assert.Nil(t, ValidateSecret(sixtyOneHexDecimalLetters+"f"))
+	assert.NotNil(t, ValidateSecret(sixtyOneHexDecimalLetters+"ff"))
+	assert.NotNil(t, ValidateSecret(sixtyOneHexDecimalLetters+"g"))
+	assert.NotNil(t, ValidateSecret(""))
 }
 
 func TestValidateEmail(t *testing.T) {
@@ -83,14 +99,4 @@ func TestSearchTerm(t *testing.T) {
 	assert.Nil(t, Validate("1", "SEARCH_TERM"))
 	assert.Nil(t, Validate("0123456789abcdefghij", "SEARCH_TERM"))
 	assert.NotNil(t, Validate("asdf!", "SEARCH_TERM"))
-}
-
-func TestValidateAppName(t *testing.T) {
-	assert.Nil(t, Validate("validappname", "APP_NAME"))
-	assert.Nil(t, Validate("app123", "APP_NAME"))
-	assert.Nil(t, Validate("app-123", "APP_NAME"))
-	assert.NotNil(t, Validate("InvalidAppName", "APP_NAME"))          // Contains uppercase
-	assert.NotNil(t, Validate("app!@#", "APP_NAME"))                  // Contains special characters
-	assert.NotNil(t, Validate("ap", "APP_NAME"))                      // Too short
-	assert.NotNil(t, Validate("thisappnameiswaytoolong", "APP_NAME")) // Too long
 }
