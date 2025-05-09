@@ -6,25 +6,19 @@ import (
 	"regexp"
 )
 
-type ValidationType int
+type ValidationType string
 
 // TODO ensure usernames, appnames and version do not contain underscores, maybe add extra test and comment that this is important for formatting
 
-const (
-	USER_NAME ValidationType = iota
-	APP_NAME                 // TODO should allow hyphens
-	VERSION_NAME
-	SEARCH_TERM
-	PASSWORD
+// TODO explicitly dont allow dots in usernames, appnames and version names
+// TODO add extra tests for these regexes
+var validationTypeMap = map[string]string{
+	"USER_NAME":    "^[a-zA-Z0-9]{3,20}$",
+	"APP_NAME":     "^[a-zA-Z0-9-]{3,20}$", // TODO should allow hyphens
+	"VERSION_NAME": "^[a-zA-Z0-9.]{3,20}$",
+	"SEARCH_TERM":  "^[a-zA-Z0-9-]{0,20}$",
+	"PASSWORD":     "^[a-zA-Z0-9-]{8,30}$",
 	// TODO anything else? -> known hosts, ports, host names and ip addresses, ...
-)
-
-// TODO just dummy stuff, re-check, and test
-var validationTypeMap = map[ValidationType]string{
-	USER_NAME:    "^[a-zA-Z0-9_]{3,16}$",
-	APP_NAME:     "^[a-zA-Z0-9_]{3,16}$",
-	VERSION_NAME: "^[0-9]+\\.[0-9]+\\.[0-9]+$",
-	SEARCH_TERM:  "^[a-zA-Z0-9_ ]{3,16}$",
 }
 
 func ValidateStruct(s interface{}) error {
@@ -38,9 +32,11 @@ func ValidateStruct(s interface{}) error {
 		field := v.Field(i)
 		structField := t.Field(i)
 
+		/* TODO is that needed?
 		if structField.Tag == "" || !field.CanInterface() {
 			continue
 		}
+		*/
 
 		tag := structField.Tag.Get("validate")
 		if tag == "" {
