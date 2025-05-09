@@ -33,11 +33,9 @@ func ValidateStruct(s interface{}) error {
 		field := v.Field(i)
 		structField := t.Field(i)
 
-		/* TODO is that needed?
-		if structField.Tag == "" || !field.CanInterface() {
-			continue
+		if !field.CanInterface() {
+			return fmt.Errorf("cannot validate non-public fields: %s", structField.Name)
 		}
-		*/
 
 		if field.Kind() == reflect.String {
 			err := validateString(field, structField)

@@ -13,6 +13,10 @@ type noValidationTag struct {
 	Value string
 }
 
+type nonPublicField struct {
+	value string `validate:"USER_NAME"`
+}
+
 type unknownTag struct {
 	Value string `validate:"unknown-type"`
 }
@@ -32,7 +36,8 @@ func TestValidateStruct(t *testing.T) {
 		{"valid struct", validStruct{"ocelotcloud"}, ""},
 		{"no validation tag", noValidationTag{"asdf"}, "no validation tag found for field: Value"},
 		{"unknown validation tag", unknownTag{"asdf"}, "unknown validation type: unknown-type"},
-		// TODO {"nested structure", nestedStructure{unknownTag{"asdf"}}, "unknown validation type: unknown-type"},
+		{"non-public field", nonPublicField{"asdf"}, "cannot validate non-public fields: value"},
+		//{"nested structure", nestedStructure{unknownTag{"asdf"}}, "unknown validation type: unknown-type"},
 	}
 
 	for _, tc := range testCases {
