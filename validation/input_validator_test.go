@@ -44,6 +44,9 @@ func TestValidateStruct(t *testing.T) {
 
 		{"nested valid structure", nestedValidStructure{validStruct{"asdf"}}, ""},
 		{"nested invalid structure", nestedInvalidStructure{unknownTag{"asdf"}}, "unknown validation type: unknown-type"},
+
+		{"string input fails", "some-string", "input must be a data structure, but was: string"},
+		{"float input fails", 1.23, "input must be a data structure, but was: string"},
 	}
 
 	for _, tc := range testCases {

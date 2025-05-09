@@ -18,7 +18,7 @@ var validationTypeMap = map[string]string{
 	"APP_NAME":     "^[a-zA-Z0-9-]{3,20}$", // TODO should allow hyphens
 	"VERSION_NAME": "^[a-zA-Z0-9.]{3,20}$",
 	"SEARCH_TERM":  "^[a-zA-Z0-9-]{0,20}$",
-	"PASSWORD":     "^[a-zA-Z0-9-]{8,30}$",
+	"PASSWORD":     "^[a-zA-Z0-9-]{8,30}$", // TODO allow more than that?
 	// TODO anything else? -> known hosts, ports, host names and ip addresses, (cookies and secrets? not requests bodies, maybe separate validation function)
 }
 
@@ -28,6 +28,10 @@ func ValidateStruct(s interface{}) error {
 		v = v.Elem()
 	}
 	t := v.Type()
+
+	if v.Kind() != reflect.Struct {
+		return fmt.Errorf("input must be a data structure, but was: %s", v.Kind())
+	}
 
 	for i := 0; i < v.NumField(); i++ {
 		field := v.Field(i)
@@ -79,7 +83,7 @@ func validateString(field reflect.Value, structField reflect.StructField) error 
 
 /* TODO
 * simplify input validation by using my "reflection" approach. Does this in store first.
-  * also check nested structures/interfaces, slices, arrays, nil, maps, pointers, simple string input (should cause error since its no data structure?) etc.
+  * also check nested structures/interfaces, numbers, slices, arrays, nil, maps, pointers, simple string input (should cause error since its no data structure?) etc.
   * other types than string needed to be checked?
   * fail if a string field was found which does not have "validate" tag, or when its value is empty, it should be a regex
   * can I use constants as tags? if not, maybe do sth like "validate:user", and the validate function checks -> if x == "user" then validate it for user regex; unknown validation type should throw error
