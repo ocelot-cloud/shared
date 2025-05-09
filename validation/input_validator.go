@@ -16,10 +16,9 @@ var ValidationTypeMap = map[string]*regexp.Regexp{
 	"SEARCH_TERM":  regexp.MustCompile("^[a-z0-9]{0,20}$"),
 	"PASSWORD":     regexp.MustCompile("^[a-zA-Z0-9!@#$%&_,.?]{8,30}$"), // TODO allow more than that?
 	// TODO anything else? -> known hosts, ports, host names and ip addresses, (cookies, ValidationCode and secrets? not requests bodies, maybe separate validation function), email,
-	"INTEGER": regexp.MustCompile("^[0-9]{1,30}$"), // relevant for ID's
-	"COOKIE":  regexp.MustCompile("^[a-f0-9]{64}$"),
-	"EMAIL":   regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
-	"NUMBER":  regexp.MustCompile("^[0-9]{1,20}$"),
+	"COOKIE": regexp.MustCompile("^[a-f0-9]{64}$"),
+	"EMAIL":  regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
+	"NUMBER": regexp.MustCompile("^[0-9]{1,20}$"),
 }
 
 func ValidateStruct(s interface{}) error {

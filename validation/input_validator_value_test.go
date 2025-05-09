@@ -84,3 +84,13 @@ func TestSearchTerm(t *testing.T) {
 	assert.Nil(t, Validate("0123456789abcdefghij", "SEARCH_TERM"))
 	assert.NotNil(t, Validate("asdf!", "SEARCH_TERM"))
 }
+
+func TestValidateAppName(t *testing.T) {
+	assert.Nil(t, Validate("validappname", "APP_NAME"))
+	assert.Nil(t, Validate("app123", "APP_NAME"))
+	assert.Nil(t, Validate("app-123", "APP_NAME"))
+	assert.NotNil(t, Validate("InvalidAppName", "APP_NAME"))          // Contains uppercase
+	assert.NotNil(t, Validate("app!@#", "APP_NAME"))                  // Contains special characters
+	assert.NotNil(t, Validate("ap", "APP_NAME"))                      // Too short
+	assert.NotNil(t, Validate("thisappnameiswaytoolong", "APP_NAME")) // Too long
+}
