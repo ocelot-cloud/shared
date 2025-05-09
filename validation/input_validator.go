@@ -20,7 +20,7 @@ var ValidationTypeMap = map[string]*regexp.Regexp{
 	"NUMBER":       regexp.MustCompile("^[0-9]{1,20}$"),
 }
 
-func validateStruct(s interface{}) error {
+func ValidateStruct(s interface{}) error {
 	reflectionObject := getReflectionObject(s)
 	fieldType := reflectionObject.Type()
 
@@ -82,7 +82,7 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 	}
 
 	if field.Kind() == reflect.Struct {
-		if err := validateStruct(field.Interface()); err != nil {
+		if err := ValidateStruct(field.Interface()); err != nil {
 			return err
 		}
 	}
@@ -104,7 +104,7 @@ func validateArrayOrSlice(field reflect.Value, structField reflect.StructField) 
 
 	if field.Type().Elem().Kind() == reflect.Struct {
 		for i := 0; i < field.Len(); i++ {
-			if err := validateStruct(field.Index(i).Interface()); err != nil {
+			if err := ValidateStruct(field.Index(i).Interface()); err != nil {
 				return err
 			}
 		}
@@ -131,7 +131,7 @@ func validateString(field reflect.Value, structField reflect.StructField) error 
 	return nil
 }
 
-func Validate(input, validationType string) error {
+func validate(input, validationType string) error {
 	regex, found := ValidationTypeMap[validationType]
 	if !found {
 		return fmt.Errorf("unknown validation type: %s", validationType)
@@ -176,7 +176,7 @@ func ReadBody[T any](w http.ResponseWriter, r *http.Request) (*T, error) {
 		return nil, fmt.Errorf("")
 	}
 
-	if err = validateStruct(result); err != nil {
+	if err = ValidateStruct(result); err != nil {
 		utils.Logger.Info("invalid input: %v", err)
 		http.Error(w, "invalid input", http.StatusBadRequest)
 		return nil, fmt.Errorf("")
