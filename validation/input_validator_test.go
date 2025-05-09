@@ -47,7 +47,7 @@ func TestValidateStruct(t *testing.T) {
 	}{
 		{"valid struct", validStruct{"ocelotcloud"}, ""},
 		{"valid struct as pointer", &validStruct{"ocelotcloud"}, ""},
-		// TODO {"valid struct with nested pointer structure", nestedPointerStructure{&validStruct{"ocelotcloud"}}, ""},
+		{"valid struct with nested pointer structure", nestedPointerStructure{&validStruct{"ocelotcloud"}}, ""},
 
 		{"no validation tag", noValidationTag{"asdf"}, "no validation tag found for field: Value"},
 		{"unknown validation tag", unknownTag{"asdf"}, "unknown validation type: unknown-type"},
@@ -57,7 +57,8 @@ func TestValidateStruct(t *testing.T) {
 		{"nested invalid structure", nestedInvalidStructure{unknownTag{"asdf"}}, "unknown validation type: unknown-type"},
 
 		{"string input fails", "some-string", "input must be a data structure, but was: string"},
-		{"float input fails", 1.23, "input must be a data structure, but was: string"},
+		{"float input fails", 1.23, "input must be a data structure, but was: float64"},
+		{"integer input fails", 123, "input must be a data structure, but was: integer"},
 
 		{"ignore fields which are neither strings nor structs", ignoreNumberFields{123}, ""},
 
