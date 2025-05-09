@@ -18,6 +18,7 @@ var ValidationTypeMap = map[string]*regexp.Regexp{
 	"password":     regexp.MustCompile("^[a-zA-Z0-9._-]{8,30}$"),
 	"email":        regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
 	"number":       regexp.MustCompile("^[0-9]{1,20}$"),
+	"host":         regexp.MustCompile("^[a-zA-Z0-9._-]{3,64}$"),
 }
 
 func ValidateStruct(s interface{}) error {

@@ -6,6 +6,10 @@ import (
 	"testing"
 )
 
+const (
+	sixtyThreeHexDecimalLetters = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcde"
+)
+
 func TestValidateUserName(t *testing.T) {
 	assert.Nil(t, validate("validusername", "user_name"))
 	assert.Nil(t, validate("user123", "user_name"))
@@ -52,12 +56,10 @@ func TestValidatePassword(t *testing.T) {
 }
 
 func TestValidateCookie(t *testing.T) {
-	sixtyOneHexDecimalLetters := "1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcde"
-
-	assert.NotNil(t, ValidateSecret(sixtyOneHexDecimalLetters))
-	assert.Nil(t, ValidateSecret(sixtyOneHexDecimalLetters+"f"))
-	assert.NotNil(t, ValidateSecret(sixtyOneHexDecimalLetters+"ff"))
-	assert.NotNil(t, ValidateSecret(sixtyOneHexDecimalLetters+"g"))
+	assert.NotNil(t, ValidateSecret(sixtyThreeHexDecimalLetters))
+	assert.Nil(t, ValidateSecret(sixtyThreeHexDecimalLetters+"f"))
+	assert.NotNil(t, ValidateSecret(sixtyThreeHexDecimalLetters+"ff"))
+	assert.NotNil(t, ValidateSecret(sixtyThreeHexDecimalLetters+"g"))
 	assert.NotNil(t, ValidateSecret(""))
 }
 
@@ -100,4 +102,15 @@ func TestSearchTerm(t *testing.T) {
 	assert.Nil(t, validate("1", "search_term"))
 	assert.Nil(t, validate("0123456789abcdefghij", "search_term"))
 	assert.NotNil(t, validate("asdf!", "search_term"))
+}
+
+func TestHost(t *testing.T) {
+	assert.Nil(t, validate("localhost", "host"))
+	assert.Nil(t, validate("localhost123", "host"))
+	assert.Nil(t, validate("example.com", "host"))
+	assert.Nil(t, validate("my_example-website.com", "host"))
+	
+	assert.NotNil(t, validate("a.", "host"))
+	assert.Nil(t, validate(sixtyThreeHexDecimalLetters+"a", "host"))
+	assert.NotNil(t, validate(sixtyThreeHexDecimalLetters+"ab", "host"))
 }
