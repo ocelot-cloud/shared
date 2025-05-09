@@ -1,7 +1,11 @@
 package validation
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/ocelot-cloud/shared/utils"
+	"io"
+	"net/http"
 	"reflect"
 	"regexp"
 )
@@ -16,7 +20,7 @@ var ValidationTypeMap = map[string]*regexp.Regexp{
 	"NUMBER":       regexp.MustCompile("^[0-9]{1,20}$"),
 }
 
-func ValidateStruct(s interface{}) error {
+func validateStruct(s interface{}) error {
 	reflectionObject := getReflectionObject(s)
 	fieldType := reflectionObject.Type()
 
@@ -78,7 +82,7 @@ func validateField(field reflect.Value, structField reflect.StructField) error {
 	}
 
 	if field.Kind() == reflect.Struct {
-		if err := ValidateStruct(field.Interface()); err != nil {
+		if err := validateStruct(field.Interface()); err != nil {
 			return err
 		}
 	}
@@ -100,7 +104,7 @@ func validateArrayOrSlice(field reflect.Value, structField reflect.StructField) 
 
 	if field.Type().Elem().Kind() == reflect.Struct {
 		for i := 0; i < field.Len(); i++ {
-			if err := ValidateStruct(field.Index(i).Interface()); err != nil {
+			if err := validateStruct(field.Index(i).Interface()); err != nil {
 				return err
 			}
 		}
@@ -155,4 +159,28 @@ func ValidateSecret(input string) error {
 	return nil
 }
 
-// TODO also add a readBody function which both modules can use, which internally does the input validation.
+func ReadBody[T any](w http.ResponseWriter, r *http.Request) (*T, error) {
+	var result T
+
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		utils.Logger.Warn("Failed to read request body: %v", err)
+		http.Error(w, "unable to read request body", http.StatusBadRequest)
+		return nil, fmt.Errorf("")
+	}
+	defer utils.Close(r.Body)
+
+	if err = json.Unmarshal(body, &result); err != nil {
+		utils.Logger.Warn("Failed to parse request body: %v", err)
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return nil, fmt.Errorf("")
+	}
+
+	if err = validateStruct(result); err != nil {
+		utils.Logger.Info("invalid input: %v", err)
+		http.Error(w, "invalid input", http.StatusBadRequest)
+		return nil, fmt.Errorf("")
+	}
+
+	return &result, nil
+}

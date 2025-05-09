@@ -170,7 +170,7 @@ func TestValidateStruct(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			err := ValidateStruct(tc.input)
+			err := validateStruct(tc.input)
 			if tc.expectedMessage == "" {
 				assert.Nil(t, err)
 			} else {
