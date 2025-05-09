@@ -53,6 +53,8 @@ func TestValidateStruct(t *testing.T) {
 		{"float input fails", 1.23, "input must be a data structure, but was: string"},
 
 		{"ignore fields which are neither strings nor structs", ignoreNumberFields{123}, ""},
+
+		// TODO 1) input of pointer of field, 2) input of struct with pointer field (maybe even nested structure)?
 	}
 
 	for _, tc := range testCases {

@@ -23,35 +23,42 @@ var validationTypeMap = map[string]string{
 }
 
 func ValidateStruct(s interface{}) error {
-	v := reflect.ValueOf(s)
-	if v.Kind() == reflect.Ptr {
-		v = v.Elem()
+	field := reflect.ValueOf(s)
+	if field.Kind() == reflect.Ptr {
+		field = field.Elem()
 	}
-	t := v.Type()
+	fieldType := field.Type()
 
-	if v.Kind() != reflect.Struct {
-		return fmt.Errorf("input must be a data structure, but was: %s", v.Kind())
+	if field.Kind() != reflect.Struct {
+		return fmt.Errorf("input must be a data structure, but was: %s", field.Kind())
 	}
 
-	for i := 0; i < v.NumField(); i++ {
-		field := v.Field(i)
-		structField := t.Field(i)
-
-		if !field.CanInterface() {
-			return fmt.Errorf("cannot validate non-public fields: %s", structField.Name)
+	for i := 0; i < field.NumField(); i++ {
+		fieldValue := field.Field(i)
+		structField := fieldType.Field(i)
+		err := validateField(fieldValue, structField)
+		if err != nil {
+			return err
 		}
+	}
+	return nil
+}
 
-		if field.Kind() == reflect.String {
-			err := validateString(field, structField)
-			if err != nil {
-				return err
-			}
+func validateField(field reflect.Value, structField reflect.StructField) error {
+	if !field.CanInterface() {
+		return fmt.Errorf("cannot validate non-public fields: %s", structField.Name)
+	}
+
+	if field.Kind() == reflect.String {
+		err := validateString(field, structField)
+		if err != nil {
+			return err
 		}
+	}
 
-		if field.Kind() == reflect.Struct {
-			if err := ValidateStruct(field.Interface()); err != nil {
-				return err
-			}
+	if field.Kind() == reflect.Struct {
+		if err := ValidateStruct(field.Interface()); err != nil {
+			return err
 		}
 	}
 	return nil
