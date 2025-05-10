@@ -12,7 +12,7 @@ import (
 
 var ValidationTypeMap = map[string]*regexp.Regexp{
 	"user_name":        regexp.MustCompile("^[a-z0-9]{3,20}$"),
-	"app_name":         regexp.MustCompile("^[a-z0-9-]{3,20}$"),
+	"app_name":         regexp.MustCompile("^[a-z0-9]{3,20}$"),
 	"version_name":     regexp.MustCompile("^[a-z0-9.]{3,20}$"),
 	"search_term":      regexp.MustCompile("^[a-z0-9]{0,20}$"),
 	"password":         regexp.MustCompile("^[a-zA-Z0-9._-]{8,30}$"),

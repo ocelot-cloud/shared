@@ -25,7 +25,7 @@ func TestValidateUserName(t *testing.T) {
 func TestValidateAppName(t *testing.T) {
 	assert.Nil(t, validate("validappname", "app_name"))
 	assert.Nil(t, validate("app123", "app_name"))
-	assert.Nil(t, validate("app-123", "app_name"))
+	assert.NotNil(t, validate("app-123", "app_name"))
 	assert.NotNil(t, validate("app_123", "app_name"))
 	assert.NotNil(t, validate("app.123", "app_name"))
 	assert.NotNil(t, validate("InvalidAppName", "app_name"))          // Contains uppercase
