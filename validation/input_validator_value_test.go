@@ -106,6 +106,7 @@ func TestSearchTerm(t *testing.T) {
 
 func TestHost(t *testing.T) {
 	assert.Nil(t, validate("localhost", "host"))
+	assert.Nil(t, validate("localhost:8443", "host"))
 	assert.Nil(t, validate("localhost123", "host"))
 	assert.Nil(t, validate("example.com", "host"))
 	assert.Nil(t, validate("my_example-website.com", "host"))

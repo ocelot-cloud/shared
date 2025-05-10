@@ -18,7 +18,7 @@ var ValidationTypeMap = map[string]*regexp.Regexp{
 	"password":         regexp.MustCompile("^[a-zA-Z0-9._-]{8,30}$"),
 	"email":            regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
 	"number":           regexp.MustCompile("^[0-9]{1,20}$"),
-	"host":             regexp.MustCompile("^[a-zA-Z0-9._-]{0,64}$"),
+	"host":             regexp.MustCompile("^[a-zA-Z0-9:._-]{0,64}$"),
 	"known_hosts":      regexp.MustCompile(`^[A-Za-z0-9.:,/_+=#@\[\]| \r\n-]{0,}$`),
 	"restic_backup_id": regexp.MustCompile(`^[a-f0-9]{64}$`),
 }
