@@ -21,6 +21,7 @@ var ValidationTypeMap = map[string]*regexp.Regexp{
 	"host":             regexp.MustCompile("^[a-zA-Z0-9:._-]{0,64}$"),
 	"known_hosts":      regexp.MustCompile(`^[A-Za-z0-9.:,/_+=#@\[\]| \r\n-]{0,}$`),
 	"restic_backup_id": regexp.MustCompile(`^[a-f0-9]{64}$`),
+	"remote_host":      regexp.MustCompile("^[a-zA-Z0-9._-]{0,64}$"),
 }
 
 func ValidateStruct(s interface{}) error {
