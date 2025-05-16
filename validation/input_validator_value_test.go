@@ -64,6 +64,7 @@ func TestValidateCookie(t *testing.T) {
 }
 
 func TestValidateEmail(t *testing.T) {
+	assert.NotNil(t, validate("", "email"))
 	assert.Nil(t, validate("admin@admin.com", "email"))
 	assert.NotNil(t, validate("@admin.com", "email"))
 	assert.NotNil(t, validate("admin@.com", "email"))
@@ -141,4 +142,14 @@ func TestResticBackupIdValidations(t *testing.T) {
 
 	assert.NotNil(t, validate(sampleResticBackupId+"a", "restic_backup_id"))
 	assert.NotNil(t, validate(sixtyThreeHexDecimalLetters+"g", "restic_backup_id"))
+}
+
+func TestValidateEmailOrEmpty(t *testing.T) {
+	assert.Nil(t, validate("", "email_or_empty"))
+	assert.Nil(t, validate("admin@admin.com", "email_or_empty"))
+	assert.NotNil(t, validate("@admin.com", "email_or_empty"))
+	assert.NotNil(t, validate("admin@.com", "email_or_empty"))
+	assert.NotNil(t, validate("admin@admin.", "email_or_empty"))
+	assert.NotNil(t, validate("adminadmin.com", "email_or_empty"))
+	assert.NotNil(t, validate("admin@admincom", "email_or_empty"))
 }

@@ -10,18 +10,23 @@ import (
 	"regexp"
 )
 
+var (
+	emailRegexSuffix = `[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z]{2,}$`
+)
+
 var ValidationTypeMap = map[string]*regexp.Regexp{
 	"user_name":        regexp.MustCompile("^[a-z0-9]{3,20}$"),
 	"app_name":         regexp.MustCompile("^[a-z0-9]{3,20}$"),
 	"version_name":     regexp.MustCompile("^[a-z0-9.]{3,20}$"),
 	"search_term":      regexp.MustCompile("^[a-z0-9]{0,20}$"),
 	"password":         regexp.MustCompile("^[a-zA-Z0-9._-]{8,30}$"),
-	"email":            regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`),
+	"email":            regexp.MustCompile("^" + emailRegexSuffix),
 	"number":           regexp.MustCompile("^[0-9]{1,20}$"),
 	"host":             regexp.MustCompile("^[a-zA-Z0-9:._-]{0,64}$"),
 	"known_hosts":      regexp.MustCompile(`^[A-Za-z0-9.:,/_+=#@\[\]| \r\n-]{0,}$`),
 	"restic_backup_id": regexp.MustCompile(`^[a-f0-9]{64}$`),
 	"remote_host":      regexp.MustCompile("^[a-zA-Z0-9._-]{0,64}$"),
+	"email_or_empty":   regexp.MustCompile(`^$|^` + emailRegexSuffix),
 }
 
 func ValidateStruct(s interface{}) error {
