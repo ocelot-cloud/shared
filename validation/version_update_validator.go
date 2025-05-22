@@ -5,10 +5,7 @@ import (
 	"strings"
 )
 
-/*
-TODO: idea: when doing automatic updates
-when doing manual updates, we should se a warning that this problem occurs -> so we need an additional endpoint to check that, which also tells und the problem
-*/
+// Known limitation: Digest (checksum) validation is not enforced. If an attacker compromises the image registry, it is considered outside the security scope of Ocelot-Cloud.
 func CheckComposeUpdateSafety(composeYaml1, composeYaml2 map[string]interface{}) error {
 	set1, err := collectImages(composeYaml1)
 	if err != nil {
@@ -33,21 +30,19 @@ func collectImages(compose map[string]interface{}) (map[string]struct{}, error) 
 	out := map[string]struct{}{}
 	servicesRaw, ok := compose["services"]
 	if !ok {
-		return out, fmt.Errorf("no services section")
+		return nil, fmt.Errorf("no services section")
 	}
 	services, ok := servicesRaw.(map[string]interface{})
 	if !ok {
-		return out, fmt.Errorf("invalid services type")
+		return nil, fmt.Errorf("invalid services type")
 	}
 	for _, svcRaw := range services {
 		svc, ok := svcRaw.(map[string]interface{})
 		if !ok {
-			// TODO to cover by test
-			return out, fmt.Errorf("invalid service definition")
+			return nil, fmt.Errorf("invalid service definition")
 		}
 		imgRaw, ok := svc["image"]
 		if !ok {
-			// TODO to cover by test
 			continue
 		}
 		img, ok := imgRaw.(string)

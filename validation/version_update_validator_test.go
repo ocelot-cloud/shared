@@ -5,13 +5,18 @@ import (
 	"testing"
 )
 
+// TODO images must belong to the same service name; so equality of service names and assignment of images is also necessary (e.g. image switches are also not allowed)
 // TODO post box: warn admin if auto update failed because unsafe
+// TODO case: adding "build:" keyword skipping image
+// TODO replacing two old images with images which have the exactly same name (does not make sense, but whatever)
+// TODO "Registry allow-list – there’s no guard against switching to another registry host that happens to share the same repo/name."
+// TODO: idea: when doing automatic updates, do the checks below; when doing manual updates, we should se a warning that this problem occurs -> so we need an additional endpoint to check that, which also tells und the problem
 
 const (
 	defaultSampleImage1          = "default-1.0"
 	defaultSampleImage2          = "default-2.0"
 	differentNameImage           = "different-image-name"
-	unequalCount                 = "two-images"
+	twoImages                    = "two-images"
 	duplicateImages              = "duplicate-images"
 	defaultSampleImageWithShaSum = "default-2.0-with-shasum"
 	registryPortImage1           = "registry-port-1.0"
@@ -29,11 +34,13 @@ func TestIsComposeUpdateSafe(t *testing.T) {
 		{"same_images_same_tags", defaultSampleImage1, defaultSampleImage1, false},
 		{"same_images_diff_tags", defaultSampleImage1, defaultSampleImage2, false},
 		{"image_name_diff", defaultSampleImage1, differentNameImage, true},
-		{"unequal_count", defaultSampleImage1, unequalCount, true},
+		{"unequal_count", defaultSampleImage1, twoImages, true},
 		{"duplicate_images", defaultSampleImage1, duplicateImages, false},
 		{"digest_vs_tag", defaultSampleImage1, defaultSampleImageWithShaSum, false},
 		{"custom_registry_port", registryPortImage1, registryPortImage2, false},
 		{"registry_port_changes", registryPortImage1, differentRegistryPort2, true},
+		{"replacing_old_images_with_same_images", twoImages, duplicateImages, true},
+		{"replacing_same_images_with_two_images", duplicateImages, twoImages, true},
 	}
 
 	for _, tt := range tests {
