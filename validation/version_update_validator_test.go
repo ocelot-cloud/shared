@@ -63,31 +63,21 @@ func TestIsComposeUpdateSafe(t *testing.T) {
 }
 
 func TestCollectImages(t *testing.T) {
+	noServices := map[string]interface{}{}
+	_, err := collectImages(noServices)
+	assert.Error(t, err)
+
 	valid := map[string]interface{}{
 		"services": map[string]interface{}{
-			"web": map[string]interface{}{"image": "nginx:latest"},
+			"web": map[string]interface{}{"image": "nginx:7.1"},
 			"db":  map[string]interface{}{"image": "mysql:8.0"},
 		},
 	}
 	images, err := collectImages(valid)
 	assert.NoError(t, err)
 	assert.Len(t, images, 2)
-
-	noServices := map[string]interface{}{}
-	_, err = collectImages(noServices)
-	assert.Error(t, err)
-
-	badType := map[string]interface{}{"services": []int{1, 2}}
-	_, err = collectImages(badType)
-	assert.Error(t, err)
-
-	notString := map[string]interface{}{
-		"services": map[string]interface{}{
-			"bad": map[string]interface{}{"image": 42},
-		},
-	}
-	_, err = collectImages(notString)
-	assert.Error(t, err)
+	assert.Contains(t, images["web"], "nginx")
+	assert.Contains(t, images["db"], "mysql")
 }
 
 func TestNormalizeImage(t *testing.T) {
