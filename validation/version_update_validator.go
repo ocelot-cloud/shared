@@ -7,27 +7,28 @@ import (
 
 // Known limitation: Digest (checksum) validation is not enforced. If an attacker compromises the image registry, it is considered outside the security scope of Ocelot-Cloud.
 func CheckComposeUpdateSafety(composeYaml1, composeYaml2 map[string]interface{}) error {
-	set1, err := collectImages(composeYaml1)
+	m1, err := collectImages(composeYaml1)
 	if err != nil {
 		return err
 	}
-	set2, err := collectImages(composeYaml2)
+	m2, err := collectImages(composeYaml2)
 	if err != nil {
 		return err
 	}
-	if len(set1) != len(set2) {
-		return fmt.Errorf("different number of images")
+	if len(m1) != len(m2) {
+		return fmt.Errorf("different number of services")
 	}
-	for img := range set1 {
-		if _, ok := set2[img]; !ok {
-			return fmt.Errorf("image %s differs", img)
+	for svc, img1 := range m1 {
+		img2, ok := m2[svc]
+		if !ok || img1 != img2 {
+			return fmt.Errorf("service %s image differs", svc)
 		}
 	}
 	return nil
 }
 
-func collectImages(compose map[string]interface{}) (map[string]struct{}, error) {
-	out := map[string]struct{}{}
+func collectImages(compose map[string]interface{}) (map[string]string, error) {
+	out := map[string]string{}
 	servicesRaw, ok := compose["services"]
 	if !ok {
 		return nil, fmt.Errorf("no services section")
@@ -36,7 +37,7 @@ func collectImages(compose map[string]interface{}) (map[string]struct{}, error) 
 	if !ok {
 		return nil, fmt.Errorf("invalid services type")
 	}
-	for _, svcRaw := range services {
+	for svcName, svcRaw := range services {
 		svc, ok := svcRaw.(map[string]interface{})
 		if !ok {
 			return nil, fmt.Errorf("invalid service definition")
@@ -49,7 +50,7 @@ func collectImages(compose map[string]interface{}) (map[string]struct{}, error) 
 		if !ok {
 			return out, fmt.Errorf("image must be string")
 		}
-		out[normalizeImage(img)] = struct{}{}
+		out[svcName] = normalizeImage(img)
 	}
 	return out, nil
 }

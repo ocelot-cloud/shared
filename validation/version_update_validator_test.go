@@ -22,6 +22,7 @@ const (
 	registryPortImage1           = "registry-port-1.0"
 	registryPortImage2           = "registry-port-2.0"
 	differentRegistryPort2       = "different-registry-port-2.0"
+	twoImagesSwapped             = "two-images-swapped"
 )
 
 func TestIsComposeUpdateSafe(t *testing.T) {
@@ -35,12 +36,14 @@ func TestIsComposeUpdateSafe(t *testing.T) {
 		{"same_images_diff_tags", defaultSampleImage1, defaultSampleImage2, false},
 		{"image_name_diff", defaultSampleImage1, differentNameImage, true},
 		{"unequal_count", defaultSampleImage1, twoImages, true},
-		{"duplicate_images", defaultSampleImage1, duplicateImages, false},
+		{"duplicate_images", defaultSampleImage1, duplicateImages, true},
 		{"digest_vs_tag", defaultSampleImage1, defaultSampleImageWithShaSum, false},
 		{"custom_registry_port", registryPortImage1, registryPortImage2, false},
 		{"registry_port_changes", registryPortImage1, differentRegistryPort2, true},
 		{"replacing_old_images_with_same_images", twoImages, duplicateImages, true},
 		{"replacing_same_images_with_two_images", duplicateImages, twoImages, true},
+		{"swapping_images_is_not_allowed", twoImages, twoImagesSwapped, true},
+		{"service_name_changes", defaultSampleImage1, "service-name-changes", true},
 	}
 
 	for _, tt := range tests {
