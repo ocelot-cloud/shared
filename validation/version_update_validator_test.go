@@ -5,11 +5,7 @@ import (
 	"testing"
 )
 
-// TODO images must belong to the same service name; so equality of service names and assignment of images is also necessary (e.g. image switches are also not allowed)
 // TODO post box: warn admin if auto update failed because unsafe
-// TODO case: adding "build:" keyword skipping image
-// TODO replacing two old images with images which have the exactly same name (does not make sense, but whatever)
-// TODO "Registry allow-list – there’s no guard against switching to another registry host that happens to share the same repo/name."
 // TODO: idea: when doing automatic updates, do the checks below; when doing manual updates, we should se a warning that this problem occurs -> so we need an additional endpoint to check that, which also tells und the problem
 
 const (
@@ -44,6 +40,8 @@ func TestIsComposeUpdateSafe(t *testing.T) {
 		{"replacing_same_images_with_two_images", duplicateImages, twoImages, true},
 		{"swapping_images_is_not_allowed", twoImages, twoImagesSwapped, true},
 		{"service_name_changes", defaultSampleImage1, "service-name-changes", true},
+		{"service_name_changes", defaultSampleImage1, "service-name-changes", true},
+		{"change_image_registry", defaultSampleImage1, "changed-registry", true},
 	}
 
 	for _, tt := range tests {

@@ -1,0 +1,3 @@
+services:
+  sample:
+    image: myregistry.com/sample:1.0
