@@ -5,23 +5,6 @@ import (
 	"testing"
 )
 
-/* TODO cases
-unequal number of distinct images → false, error
-same images, different tags → true, nil
-same images, same tags → true, nil
-same count, at least one image name differs → false, error
-duplicate images within a file but identical unique sets → true, nil
-custom registry with port (registry:5000/repo:tag) vs different tag → true, nil
-digest vs tag (repo@sha256:… vs repo:tag) → true, nil
-compose without services section → false, error
-service image value not a string → false, error
-service lacking image field in one file causes set mismatch → false, error
-no images contained in a file
-
-post box: warn admin if auto update failed because unsafe
-handle special sign like "@", ":" and "/"
-*/
-
 // TODO post box: warn admin if auto update failed because unsafe
 
 const (
@@ -31,6 +14,9 @@ const (
 	unequalCount                 = "two-images"
 	duplicateImages              = "duplicate-images"
 	defaultSampleImageWithShaSum = "default-2.0-with-shasum"
+	registryPortImage1           = "registry-port-1.0"
+	registryPortImage2           = "registry-port-2.0"
+	differentRegistryPort2       = "different-registry-port-2.0"
 )
 
 func TestIsComposeUpdateSafe(t *testing.T) {
@@ -46,14 +32,8 @@ func TestIsComposeUpdateSafe(t *testing.T) {
 		{"unequal_count", defaultSampleImage1, unequalCount, true},
 		{"duplicate_images", defaultSampleImage1, duplicateImages, false},
 		{"digest_vs_tag", defaultSampleImage1, defaultSampleImageWithShaSum, false},
-		/*
-			{"custom_registry_port", "port_tag_1", "port_tag_2", false},
-			{"custom_registry_port", "port_tag_1", "port_tag_2", false},
-			{"registry_port_changes", "port_tag_1", "port_tag_2", true},
-			{"no_services_section", "no_services", "same_tags_1", true},
-			{"image_not_string", "not_string", "same_tags_1", true},
-			{"no_images", "no_images", "no_images", false},
-		*/
+		{"custom_registry_port", registryPortImage1, registryPortImage2, false},
+		{"registry_port_changes", registryPortImage1, differentRegistryPort2, true},
 	}
 
 	for _, tt := range tests {
