@@ -1,0 +1,3 @@
+services:
+  sample:
+    image: sample/sample:1.0@sha256:8b5a98abe52dacbead16eb4179c9abb7c217d523df3a75901343906ae7853357
