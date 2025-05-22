@@ -43,7 +43,7 @@ func collectImages(compose map[string]interface{}) (map[string]struct{}, error) 
 		}
 		imgRaw, ok := svc["image"]
 		if !ok {
-			continue
+			return nil, fmt.Errorf("no image field in service")
 		}
 		img, ok := imgRaw.(string)
 		if !ok {
