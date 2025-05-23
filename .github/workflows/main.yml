@@ -16,4 +16,4 @@ jobs:
 
       - name: Run CI Tests
         run: |
-          bash test-all.sh
+          bash test.sh
