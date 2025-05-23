@@ -8,4 +8,4 @@ Please read the [Community](https://ocelot-cloud.org/docs/community/) articles f
 
 ### License
 
-This project is licensed under the Affero General Public License v3.0. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the 0BSD License - see the [LICENSE](LICENSE) file for details.
