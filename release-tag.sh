@@ -3,7 +3,7 @@
 set -e
 
 go get -u ./...
-go build
+go build ./...
 bash test.sh
 
 LAST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
