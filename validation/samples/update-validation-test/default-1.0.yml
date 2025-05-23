@@ -1,0 +1,3 @@
+services:
+  sample:
+    image: sample/sample:1.0

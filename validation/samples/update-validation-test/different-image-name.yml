@@ -1,0 +1,3 @@
+services:
+  sample:
+    image: sample/different:2.0

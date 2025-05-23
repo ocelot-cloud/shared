@@ -1,0 +1,5 @@
+services:
+  sample:
+    image: sample/sample:1.0
+  gitea:
+    image: sample/sample:1.0
