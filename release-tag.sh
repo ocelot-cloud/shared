@@ -2,11 +2,9 @@
 
 set -e
 
-PROJECT_DIR="$(pwd)"
-go get -u
+go get -u ./...
 go build
-cd "$PROJECT_DIR/utils"
-go test ./...
+bash test.sh
 
 LAST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
 echo "The last tag was: $LAST_TAG"
