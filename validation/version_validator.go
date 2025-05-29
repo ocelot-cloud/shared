@@ -455,15 +455,15 @@ func validateNetworksDefinition(serviceName string, networks interface{}) error 
 	return nil
 }
 
-func CompleteDockerComposeYaml(maintainer, appName, filePath string) error {
-	m, err := readCompose(filePath)
+func CompleteDockerComposeYaml(maintainer, appName, filePath, host string) error {
+	composeMap, err := readCompose(filePath)
 	if err != nil {
 		return err
 	}
-	addExternalNetwork(m, maintainer, appName)
-	updateServices(m, maintainer, appName)
-	updateVolumes(m)
-	return writeCompose(filePath, m)
+	addExternalNetwork(composeMap, maintainer, appName)
+	updateServices(composeMap, maintainer, appName)
+	updateVolumes(composeMap)
+	return writeCompose(composeMap, filePath, host)
 }
 
 func readCompose(filePath string) (map[string]interface{}, error) {
@@ -518,12 +518,13 @@ func updateVolumes(m map[string]interface{}) {
 	m["volumes"] = volumes
 }
 
-func writeCompose(filePath string, m map[string]interface{}) error {
-	o, err := yaml.Marshal(m)
+func writeCompose(m map[string]interface{}, filePath, host string) error {
+	composeBytes, err := yaml.Marshal(m)
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(filePath, o, 0600)
+	content := strings.ReplaceAll(string(composeBytes), "${HOST}", host)
+	return os.WriteFile(filePath, []byte(content), 0600)
 }
 
 func ZipDirectory(dirPath string) ([]byte, error) {

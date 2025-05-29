@@ -171,7 +171,7 @@ func copyFile(src, dst string) error {
 func TestCompleteDockerComposeYaml(t *testing.T) {
 	defer tr.Remove("input.yml")
 	tr.Copy(getSamplesDir()+"/yaml-keyword-completion", "input.yml", ".")
-	err := CompleteDockerComposeYaml("samplemaintainer", "gitea", "input.yml")
+	err := CompleteDockerComposeYaml("samplemaintainer", "gitea", "input.yml", "my-domain.com")
 	assert.Nil(t, err)
 	expectedBytes, err := os.ReadFile(getSamplesDir() + "/yaml-keyword-completion/expected-output.yml")
 	assert.Nil(t, err)

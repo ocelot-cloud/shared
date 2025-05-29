@@ -2,6 +2,8 @@ services:
     gitea:
         image: gitea/gitea:1.20.2
         container_name: samplemaintainer_gitea_gitea
+        environment:
+            - HOST=https://my-domain.com
         restart: unless-stopped
         networks:
             - samplemaintainer_gitea
