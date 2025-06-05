@@ -103,7 +103,7 @@ func TestValidation(t *testing.T) {
 		{"exposing-port-80.yml", fmt.Sprintf(notAllowedExposingDefaultHttpPorts, "80")},
 		{"exposing-port-443.yml", fmt.Sprintf(notAllowedExposingDefaultHttpPorts, "443")},
 
-		{"docker-compose-consistency-check.yml", "docker-compose.yml consistency check failed: service \"gitea\" refers to undefined volume samplemaintainer_gitea_wrong-name: invalid compose project"},
+		{"docker-compose-consistency-check.yml", "docker-compose.yml consistency check failed: invalid compose project"},
 
 		{"wrong-volume-prefix.yml", fmt.Sprintf(wrongVolumeNamePrefix, expectedPrefix)},
 
