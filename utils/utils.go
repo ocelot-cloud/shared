@@ -190,6 +190,7 @@ func GenerateCookie() (*http.Cookie, error) {
 		Expires:  GetTimeIn30Days(),
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
+		HttpOnly: true,
 	}, nil
 }
 

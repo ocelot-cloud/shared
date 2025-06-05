@@ -64,6 +64,7 @@ func TestGenerateCookie(t *testing.T) {
 	assert.Equal(t, http.SameSiteStrictMode, cookie.SameSite)
 	assert.True(t, cookie.Expires.After(time.Now()))
 	assert.True(t, cookie.Expires.Before(time.Now().Add(31*24*time.Hour)))
+	assert.True(t, cookie.HttpOnly)
 }
 
 func TestFindDir(t *testing.T) {
