@@ -163,9 +163,6 @@ func checkDockerComposeSyntax(composePath string) error {
 	cmd.Stderr = &stderr
 	if err := cmd.Run(); err != nil {
 		errorMsg := stderr.String()
-		if idx := strings.Index(errorMsg, ": "); idx != -1 {
-			errorMsg = errorMsg[idx+2:]
-		}
 		return fmt.Errorf("docker-compose.yml consistency check failed: %s", errorMsg)
 	}
 	return nil
