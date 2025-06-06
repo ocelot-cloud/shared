@@ -187,14 +187,15 @@ func GenerateCookie() (*http.Cookie, error) {
 	return &http.Cookie{
 		Name:     "auth",
 		Value:    hex.EncodeToString(randomBytes),
-		Expires:  GetTimeIn30Days(),
+		Expires:  GetTimeInSevenDays(),
 		Path:     "/",
 		SameSite: http.SameSiteStrictMode,
+		HttpOnly: true,
 	}, nil
 }
 
-func GetTimeIn30Days() time.Time {
-	return time.Now().UTC().AddDate(0, 0, 30)
+func GetTimeInSevenDays() time.Time {
+	return time.Now().UTC().AddDate(0, 0, 7)
 }
 
 func SaltAndHash(clearText string) (string, error) {
