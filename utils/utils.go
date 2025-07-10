@@ -58,8 +58,8 @@ type ComponentClient struct {
 	VerifyCertificate bool
 }
 
-func (c *ComponentClient) DoRequest(path string, payload interface{}, expectedMessage string) ([]byte, error) {
-	resp, err := c.DoRequestWithFullResponse(path, payload, expectedMessage)
+func (c *ComponentClient) DoRequest(path string, payload interface{}) ([]byte, error) {
+	resp, err := c.DoRequestWithFullResponse(path, payload)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func (c *ComponentClient) DoRequest(path string, payload interface{}, expectedMe
 	return respBody, nil
 }
 
-func (c *ComponentClient) DoRequestWithFullResponse(path string, payload interface{}, expectedMessage string) (*http.Response, error) {
+func (c *ComponentClient) DoRequestWithFullResponse(path string, payload interface{}) (*http.Response, error) {
 	url := c.RootUrl + path
 
 	payloadBytes, err := json.Marshal(payload)
@@ -103,11 +103,6 @@ func (c *ComponentClient) DoRequestWithFullResponse(path string, payload interfa
 	respBody, err := assertOkStatusAndExtractBody(resp)
 	if err != nil {
 		return nil, err
-	}
-
-	responseMessage, _ := strings.CutSuffix(string(respBody), "\n")
-	if expectedMessage != "" && expectedMessage != responseMessage {
-		return nil, fmt.Errorf("expected response message '%s', got '%s'", expectedMessage, responseMessage)
 	}
 
 	if len(resp.Cookies()) == 1 {
