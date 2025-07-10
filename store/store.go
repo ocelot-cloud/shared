@@ -224,3 +224,7 @@ func (h *AppStoreClient) CheckAuth() error {
 func (h *AppStoreClient) SetVersionId(versionId string) {
 	h.VersionId = versionId
 }
+
+func (h *AppStoreClient) SetSearchForUnofficialApps(search bool) {
+	h.ShowUnofficialApps = search
+}
