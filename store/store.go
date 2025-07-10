@@ -228,3 +228,7 @@ func (h *AppStoreClient) SetVersionId(versionId string) {
 func (h *AppStoreClient) SetSearchForUnofficialApps(search bool) {
 	h.ShowUnofficialApps = search
 }
+
+func (h *AppStoreClient) SetAppId(appId string) {
+	h.AppId = appId
+}
