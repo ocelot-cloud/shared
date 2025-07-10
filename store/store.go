@@ -29,17 +29,6 @@ var (
 	AppGetListPath  = AppPath + "/get-list"
 	AppDeletePath   = AppPath + "/delete"
 	SearchAppsPath  = AppPath + "/search"
-
-	SampleUser     = "samplemaintainer"
-	SampleApp      = "gitea"
-	SampleVersion  = "0.0.1"
-	SampleEmail    = "testuser@example.com"
-	SamplePassword = "mypassword"
-	SampleForm     = &RegistrationForm{
-		SampleUser,
-		SamplePassword,
-		SampleEmail,
-	}
 )
 
 func (h *AppStoreClient) RegisterAndValidateUser() error {
