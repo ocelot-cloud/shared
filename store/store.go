@@ -220,3 +220,7 @@ func (h *AppStoreClient) CheckAuth() error {
 	_, err := h.Parent.DoRequest(AuthCheckPath, nil)
 	return err
 }
+
+func (h *AppStoreClient) SetVersionId(versionId string) {
+	h.VersionId = versionId
+}
