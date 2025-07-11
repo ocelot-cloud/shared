@@ -560,17 +560,27 @@ func CollectBuildTags(dir string) ([]string, error) {
 }
 
 func extractTagsFromLine(line string) []string {
+	var tags []string
 	if strings.HasPrefix(line, "//go:build") {
 		fields := strings.Fields(line)
 		if len(fields) > 1 {
-			return fields[1:]
+			tags = fields[1:]
 		}
 	}
 	if strings.HasPrefix(line, "// +build") {
 		fields := strings.Fields(line)
 		if len(fields) > 2 {
-			return fields[2:]
+			tags = fields[2:]
 		}
 	}
-	return nil
+
+	var filteredTags []string
+	for _, tag := range tags {
+		if strings.HasPrefix(tag, "!") {
+			continue
+		}
+		filteredTags = append(filteredTags, tag)
+	}
+
+	return filteredTags
 }

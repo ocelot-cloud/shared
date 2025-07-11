@@ -116,13 +116,13 @@ func TestUnzipToDirFileCountLimit(t *testing.T) {
 func TestExtractFromLine(t *testing.T) {
 	assert.Equal(t, 0, len(extractTagsFromLine("// random comment")))
 
-	tags := extractTagsFromLine("//go:build a !b")
+	tags := extractTagsFromLine("//go:build a !b c")
 	assert.Equal(t, 2, len(tags))
 	assert.Equal(t, "a", tags[0])
-	assert.Equal(t, "!b", tags[1])
+	assert.Equal(t, "c", tags[1])
 
-	tags = extractTagsFromLine("// +build c !d")
+	tags = extractTagsFromLine("// +build a !b c")
 	assert.Equal(t, 2, len(tags))
-	assert.Equal(t, "c", tags[0])
-	assert.Equal(t, "!d", tags[1])
+	assert.Equal(t, "a", tags[0])
+	assert.Equal(t, "c", tags[1])
 }
