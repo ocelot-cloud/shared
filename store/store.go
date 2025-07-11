@@ -30,39 +30,37 @@ var (
 	AppGetListPath  = AppPath + "/get-list"
 	AppDeletePath   = AppPath + "/delete"
 	SearchAppsPath  = AppPath + "/search"
+
+	DefaultValidationCode = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 )
 
-func (h *AppStoreClient) RegisterAndValidateUser() error {
-	err := h.RegisterUser()
+func (h *AppStoreClient) RegisterAndValidateUser(user, password, email string) error {
+	err := h.RegisterUser(user, password, email)
 	if err != nil {
 		return err
 	}
 	return h.ValidateCode()
 }
 
-func (h *AppStoreClient) RegisterUser() error {
-	form := getRegistrationForm(h)
+func (h *AppStoreClient) RegisterUser(user, password, email string) error {
+	form := RegistrationForm{
+		User:     user,
+		Password: password,
+		Email:    email,
+	}
 	_, err := h.Parent.DoRequest(RegistrationPath, form)
 	return err
 }
 
-func getRegistrationForm(hub *AppStoreClient) *RegistrationForm {
-	return &RegistrationForm{
-		User:     hub.Parent.User,
-		Password: hub.Parent.Password,
-		Email:    hub.Email,
-	}
-}
-
 func (h *AppStoreClient) ValidateCode() error {
-	_, err := h.Parent.DoRequest(EmailValidationPath+"?code="+h.ValidationCode, nil)
+	_, err := h.Parent.DoRequest(EmailValidationPath+"?code="+DefaultValidationCode, nil)
 	return err
 }
 
-func (h *AppStoreClient) Login() error {
+func (h *AppStoreClient) Login(username, password string) error {
 	creds := LoginCredentials{
-		User:     h.Parent.User,
-		Password: h.Parent.Password,
+		User:     username,
+		Password: password,
 	}
 
 	resp, err := h.Parent.DoRequestWithFullResponse(LoginPath, creds)
@@ -83,28 +81,27 @@ func (h *AppStoreClient) DeleteUser() error {
 	return err
 }
 
-func (h *AppStoreClient) CreateApp() error {
-	_, err := h.Parent.DoRequest(AppCreationPath, AppNameString{Value: h.App})
+func (h *AppStoreClient) CreateApp(appName string) (string, error) {
+	_, err := h.Parent.DoRequest(AppCreationPath, AppNameString{appName})
 	if err != nil {
-		return err
+		return "", err
 	}
-	apps, err := h.ListOwnApps()
+	appsInStore, err := h.ListOwnApps()
 	if err != nil {
-		return err
+		return "", err
 	}
-	for _, app := range apps {
-		if app.Name == h.App {
-			h.AppId = app.Id
-			return nil
+	for _, appInStore := range appsInStore {
+		if appInStore.Name == appName {
+			return appInStore.Id, nil
 		}
 	}
-	return fmt.Errorf("app not found on server")
+	return "", fmt.Errorf("app not found on server")
 }
 
-func (h *AppStoreClient) SearchForApps(searchTerm string) ([]AppWithLatestVersion, error) {
+func (h *AppStoreClient) SearchForApps(searchTerm string, showUnofficialApps bool) ([]AppWithLatestVersion, error) {
 	appSearchRequest := AppSearchRequest{
 		SearchTerm:         searchTerm,
-		ShowUnofficialApps: h.ShowUnofficialApps,
+		ShowUnofficialApps: showUnofficialApps,
 	}
 	result, err := h.Parent.DoRequest(SearchAppsPath, appSearchRequest)
 	if err != nil {
@@ -133,32 +130,31 @@ func (h *AppStoreClient) ListOwnApps() ([]App, error) {
 	return *apps, nil
 }
 
-func (h *AppStoreClient) UploadVersion() error {
+func (h *AppStoreClient) UploadVersion(appId, versionName string, content []byte) (string, error) {
 	tapUpload := &VersionUpload{
-		AppId:   h.AppId,
-		Version: h.Version,
-		Content: h.UploadContent,
+		AppId:   appId,
+		Version: versionName,
+		Content: content,
 	}
 	_, err := h.Parent.DoRequest(VersionUploadPath, tapUpload)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	versions, err := h.GetVersions()
+	versionsInStore, err := h.GetVersions(appId)
 	if err != nil {
-		return err
+		return "", err
 	}
-	for _, version := range versions {
-		if version.Name == h.Version {
-			h.VersionId = version.Id
-			return nil
+	for _, versionInStore := range versionsInStore {
+		if versionInStore.Name == versionName {
+			return versionInStore.Id, nil
 		}
 	}
-	return fmt.Errorf("version not found on server")
+	return "", fmt.Errorf("version not found on server")
 }
 
-func (h *AppStoreClient) DownloadVersion() (*FullVersionInfo, error) {
-	result, err := h.Parent.DoRequest(DownloadPath, NumberString{Value: h.VersionId})
+func (h *AppStoreClient) DownloadVersion(versionId string) (*FullVersionInfo, error) {
+	result, err := h.Parent.DoRequest(DownloadPath, NumberString{versionId})
 	if err != nil {
 		return nil, err
 	}
@@ -176,8 +172,8 @@ func (h *AppStoreClient) DownloadVersion() (*FullVersionInfo, error) {
 	return fullVersionInfo, nil
 }
 
-func (h *AppStoreClient) GetVersions() ([]Version, error) {
-	result, err := h.Parent.DoRequest(GetVersionsPath, NumberString{Value: h.AppId})
+func (h *AppStoreClient) GetVersions(appId string) ([]Version, error) {
+	result, err := h.Parent.DoRequest(GetVersionsPath, NumberString{appId})
 	if err != nil {
 		return nil, err
 	}
@@ -190,20 +186,20 @@ func (h *AppStoreClient) GetVersions() ([]Version, error) {
 	return *versions, nil
 }
 
-func (h *AppStoreClient) DeleteVersion() error {
-	_, err := h.Parent.DoRequest(VersionDeletePath, NumberString{Value: h.VersionId})
+func (h *AppStoreClient) DeleteVersion(versionId string) error {
+	_, err := h.Parent.DoRequest(VersionDeletePath, NumberString{versionId})
 	return err
 }
 
-func (h *AppStoreClient) DeleteApp() error {
-	_, err := h.Parent.DoRequest(AppDeletePath, NumberString{Value: h.AppId})
+func (h *AppStoreClient) DeleteApp(appId string) error {
+	_, err := h.Parent.DoRequest(AppDeletePath, NumberString{appId})
 	return err
 }
 
-func (h *AppStoreClient) ChangePassword() error {
+func (h *AppStoreClient) ChangePassword(oldPassword, newPassword string) error {
 	form := ChangePasswordForm{
-		OldPassword: h.Parent.Password,
-		NewPassword: h.Parent.NewPassword,
+		OldPassword: oldPassword,
+		NewPassword: newPassword,
 	}
 
 	_, err := h.Parent.DoRequest(ChangePasswordPath, form)
@@ -225,16 +221,4 @@ func (h *AppStoreClient) Logout() error {
 func (h *AppStoreClient) CheckAuth() error {
 	_, err := h.Parent.DoRequest(AuthCheckPath, nil)
 	return err
-}
-
-func (h *AppStoreClient) SetVersionId(versionId string) {
-	h.VersionId = versionId
-}
-
-func (h *AppStoreClient) SetSearchForUnofficialApps(search bool) {
-	h.ShowUnofficialApps = search
-}
-
-func (h *AppStoreClient) SetAppId(appId string) {
-	h.AppId = appId
 }

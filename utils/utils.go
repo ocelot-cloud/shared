@@ -48,9 +48,6 @@ func SendJsonResponse(w http.ResponseWriter, data interface{}) {
 }
 
 type ComponentClient struct {
-	User              string
-	Password          string
-	NewPassword       string
 	Cookie            *http.Cookie
 	SetCookieHeader   bool
 	RootUrl           string

@@ -40,15 +40,7 @@ type RegistrationForm struct {
 }
 
 type AppStoreClient struct {
-	Parent             utils.ComponentClient
-	Email              string
-	App                string
-	Version            string
-	UploadContent      []byte
-	AppId              string
-	VersionId          string
-	ValidationCode     string
-	ShowUnofficialApps bool
+	Parent utils.ComponentClient
 }
 
 type LoginCredentials struct {
