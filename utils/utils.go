@@ -543,13 +543,9 @@ func CollectBuildTags(dir string) ([]string, error) {
 		scanner := bufio.NewScanner(f)
 		for scanner.Scan() {
 			line := strings.TrimSpace(scanner.Text())
-			if strings.HasPrefix(line, "//go:build") || strings.HasPrefix(line, "// +build") {
-				fields := strings.Fields(line)
-				if len(fields) > 1 {
-					for _, tag := range fields[1:] {
-						tagSet[tag] = struct{}{}
-					}
-				}
+			extractedTags := extractTagsFromLine(line)
+			for _, tag := range extractedTags {
+				tagSet[tag] = struct{}{}
 			}
 		}
 		return scanner.Err()
@@ -561,4 +557,20 @@ func CollectBuildTags(dir string) ([]string, error) {
 		tags = append(tags, tag)
 	}
 	return tags, nil
+}
+
+func extractTagsFromLine(line string) []string {
+	if strings.HasPrefix(line, "//go:build") {
+		fields := strings.Fields(line)
+		if len(fields) > 1 {
+			return fields[1:]
+		}
+	}
+	if strings.HasPrefix(line, "// +build") {
+		fields := strings.Fields(line)
+		if len(fields) > 2 {
+			return fields[2:]
+		}
+	}
+	return nil
 }
