@@ -3,6 +3,7 @@ package store
 import (
 	"fmt"
 	"github.com/ocelot-cloud/shared/utils"
+	"github.com/ocelot-cloud/shared/validation"
 )
 
 var (
@@ -165,6 +166,11 @@ func (h *AppStoreClient) DownloadVersion() (*FullVersionInfo, error) {
 	fullVersionInfo, err := utils.UnpackResponse[FullVersionInfo](result)
 	if err != nil {
 		return nil, err
+	}
+
+	err = validation.ValidateVersion(fullVersionInfo.Content, fullVersionInfo.Maintainer, fullVersionInfo.AppName)
+	if err != nil {
+		return nil, fmt.Errorf("version validation failed: %w", err)
 	}
 
 	return fullVersionInfo, nil
