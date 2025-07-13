@@ -482,7 +482,7 @@ func AnalyzeCode(dir string) {
 	buildTags, err := CollectBuildTags(dir)
 	if err != nil {
 		tr.ColoredPrintln("Error collecting build tags: %s", err.Error())
-		tr.CleanupAndExitWithError()
+		os.Exit(1)
 	}
 	if len(buildTags) == 0 {
 		tr.ColoredPrintln("No build tags found")
