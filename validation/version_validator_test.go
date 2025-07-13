@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/ocelot-cloud/shared/assert"
 	"github.com/ocelot-cloud/shared/utils"
-	tr "github.com/ocelot-cloud/task-runner"
+	"github.com/ocelot-cloud/task-runner"
 	"os"
 	"path/filepath"
 	"strings"
@@ -169,6 +169,7 @@ func copyFile(src, dst string) error {
 }
 
 func TestCompleteDockerComposeYaml(t *testing.T) {
+	tr := taskrunner.GetTaskRunner()
 	defer tr.Remove("input.yml")
 	tr.Copy(getSamplesDir()+"/yaml-keyword-completion", "input.yml", ".")
 	err := CompleteDockerComposeYaml("samplemaintainer", "gitea", "input.yml", "my-domain.com")

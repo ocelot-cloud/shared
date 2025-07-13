@@ -16,7 +16,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
-	tr "github.com/ocelot-cloud/task-runner"
+	"github.com/ocelot-cloud/task-runner"
 	"golang.org/x/crypto/bcrypt"
 	"io"
 	"io/fs"
@@ -476,18 +476,18 @@ func RemoveDir(path string) {
 	}
 }
 
-func AnalyzeCode(dir string) {
-	tr.PrintTaskDescription("Analysing code of backend")
+func AnalyzeCode(tr *taskrunner.TaskRunner, dir string) {
+	tr.Log.Info("Analysing code of backend")
 
 	buildTags, err := CollectBuildTags(dir)
 	if err != nil {
-		tr.ColoredPrintln("Error collecting build tags: %s", err.Error())
+		tr.Log.Error("Error collecting build tags: %s", err.Error())
 		os.Exit(1)
 	}
 	if len(buildTags) == 0 {
-		tr.ColoredPrintln("No build tags found")
+		tr.Log.Info("No build tags found")
 	} else {
-		tr.ColoredPrintln("Build tags found: %s", strings.Join(buildTags, ", "))
+		tr.Log.Info("Build tags found: %s", strings.Join(buildTags, ", "))
 	}
 	buildTagString := strings.Join(buildTags, ",")
 
@@ -499,29 +499,29 @@ func AnalyzeCode(dir string) {
 	}
 
 	vetCmd := fmt.Sprintf("go vet %s./...", buildTagsInsertionString)
-	tr.ColoredPrintln("go vet: reports suspicious constructs, such as Printf calls whose arguments do not align with the format string")
+	tr.Log.Info("go vet: reports suspicious constructs, such as Printf calls whose arguments do not align with the format string")
 	tr.ExecuteInDir(dir, vetCmd)
 
 	staticCheckCmd := fmt.Sprintf("staticcheck %s ./...", buildTagsInsertionString)
-	tr.ColoredPrintln("staticcheck: finds bugs, performance issues, and other problems in Go code")
+	tr.Log.Info("staticcheck: finds bugs, performance issues, and other problems in Go code")
 	tr.ExecuteInDir(dir, staticCheckCmd)
 
 	golangCiLintCmd := fmt.Sprintf("golangci-lint run --build-tags %s ./...", buildTagString)
-	tr.ColoredPrintln("golangci-lint: runs multiple linters to enforce style and catch potential bugs")
+	tr.Log.Info("golangci-lint: runs multiple linters to enforce style and catch potential bugs")
 	tr.ExecuteInDir(dir, golangCiLintCmd)
 
 	goSecCmd := fmt.Sprintf("gosec %s ./...", buildTagsInsertionString)
-	tr.ColoredPrintln("gosec: checks for common security issues in Go code")
+	tr.Log.Info("gosec: checks for common security issues in Go code")
 	tr.ExecuteInDir(dir, goSecCmd)
 
 	errCheckCmd := fmt.Sprintf("errcheck %s ./...", buildTagsInsertionString)
-	tr.ColoredPrintln("errcheck: reports unchecked errors in Go code")
+	tr.Log.Info("errcheck: reports unchecked errors in Go code")
 	tr.ExecuteInDir(dir, errCheckCmd)
 
-	tr.ColoredPrintln("ineffassign: detects assignments to variables that are never used")
+	tr.Log.Info("ineffassign: detects assignments to variables that are never used")
 	tr.ExecuteInDir(dir, "ineffassign ./...")
 
-	tr.ColoredPrintln("unparam: reports unused function parameters")
+	tr.Log.Info("unparam: reports unused function parameters")
 	tr.ExecuteInDir(dir, "unparam ./...")
 }
 
