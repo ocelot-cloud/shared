@@ -477,7 +477,7 @@ func RemoveDir(path string) {
 }
 
 func AnalyzeCode(tr *taskrunner.TaskRunner, dir string) {
-	tr.Log.Info("Analysing code of backend")
+	tr.Log.TaskDescription("Analysing code of backend")
 
 	buildTags, err := CollectBuildTags(dir)
 	if err != nil {
@@ -499,29 +499,29 @@ func AnalyzeCode(tr *taskrunner.TaskRunner, dir string) {
 	}
 
 	vetCmd := fmt.Sprintf("go vet %s./...", buildTagsInsertionString)
-	tr.Log.Info("go vet: reports suspicious constructs, such as Printf calls whose arguments do not align with the format string")
+	tr.Log.Info("\ngo vet: reports suspicious constructs, such as Printf calls whose arguments do not align with the format string")
 	tr.ExecuteInDir(dir, vetCmd)
 
 	staticCheckCmd := fmt.Sprintf("staticcheck %s ./...", buildTagsInsertionString)
-	tr.Log.Info("staticcheck: finds bugs, performance issues, and other problems in Go code")
+	tr.Log.Info("\nstaticcheck: finds bugs, performance issues, and other problems in Go code")
 	tr.ExecuteInDir(dir, staticCheckCmd)
 
 	golangCiLintCmd := fmt.Sprintf("golangci-lint run --build-tags %s ./...", buildTagString)
-	tr.Log.Info("golangci-lint: runs multiple linters to enforce style and catch potential bugs")
+	tr.Log.Info("\ngolangci-lint: runs multiple linters to enforce style and catch potential bugs")
 	tr.ExecuteInDir(dir, golangCiLintCmd)
 
 	goSecCmd := fmt.Sprintf("gosec %s ./...", buildTagsInsertionString)
-	tr.Log.Info("gosec: checks for common security issues in Go code")
+	tr.Log.Info("\ngosec: checks for common security issues in Go code")
 	tr.ExecuteInDir(dir, goSecCmd)
 
 	errCheckCmd := fmt.Sprintf("errcheck %s ./...", buildTagsInsertionString)
-	tr.Log.Info("errcheck: reports unchecked errors in Go code")
+	tr.Log.Info("\nerrcheck: reports unchecked errors in Go code")
 	tr.ExecuteInDir(dir, errCheckCmd)
 
-	tr.Log.Info("ineffassign: detects assignments to variables that are never used")
+	tr.Log.Info("\nineffassign: detects assignments to variables that are never used")
 	tr.ExecuteInDir(dir, "ineffassign ./...")
 
-	tr.Log.Info("unparam: reports unused function parameters")
+	tr.Log.Info("\nunparam: reports unused function parameters")
 	tr.ExecuteInDir(dir, "unparam ./...")
 }
 
