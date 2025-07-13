@@ -5,7 +5,7 @@ go 1.24.1
 require (
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/lib/pq v1.10.9
-	github.com/ocelot-cloud/task-runner v0.0.27
+	github.com/ocelot-cloud/task-runner v0.0.28
 	github.com/rs/zerolog v1.34.0
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.40.0

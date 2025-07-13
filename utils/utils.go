@@ -478,6 +478,7 @@ func RemoveDir(path string) {
 
 func AnalyzeCode(tr *taskrunner.TaskRunner, dir string) {
 	tr.Log.TaskDescription("Analysing code of backend")
+	tr.Config.CleanupOnFailure = false
 
 	buildTags, err := CollectBuildTags(dir)
 	if err != nil {
