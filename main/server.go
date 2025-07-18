@@ -16,11 +16,11 @@ func main() {
 		data := SingleString{Value: "pong"}
 		utils.SendJsonResponse(w, data)
 	})
-	utils.Logger.Info("Listening on port 8080")
+	utils.Logger.InfoF("Listening on port 8080")
 	go func() {
 		err := http.ListenAndServe(":8080", nil)
 		if err != nil {
-			utils.Logger.Error("ErrorF starting server: %v", err)
+			utils.Logger.ErrorF("ErrorF starting server: %v", err)
 			os.Exit(1)
 		}
 	}()
