@@ -16,18 +16,18 @@ func main() {
 		data := SingleString{Value: "pong"}
 		utils.SendJsonResponse(w, data)
 	})
-	utils.Logger.InfoF("Listening on port 8080")
+	utils.Logger.Info("Listening on port 8080")
 	go func() {
 		err := http.ListenAndServe(":8080", nil)
 		if err != nil {
-			utils.Logger.ErrorF("ErrorF starting server: %v", err)
+			utils.Logger.Error("ErrorF starting server", utils.ErrorField, err)
 			os.Exit(1)
 		}
 	}()
 
 	err := exec.Command("go", "test", "-v", "./...").Run()
 	if err != nil {
-		utils.Logger.ErrorF("Tests failed: %v", err)
+		utils.Logger.Error("Tests failed", utils.ErrorField, err)
 		os.Exit(1)
 	}
 

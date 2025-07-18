@@ -173,20 +173,20 @@ func ReadBody[T any](w http.ResponseWriter, r *http.Request) (*T, error) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		utils.Logger.WarnF("Failed to read request body: %v", err)
+		utils.Logger.Warn("Failed to read request body", utils.ErrorField, err)
 		http.Error(w, "unable to read request body", http.StatusBadRequest)
 		return nil, fmt.Errorf("")
 	}
 	defer utils.Close(r.Body)
 
 	if err = json.Unmarshal(body, &result); err != nil {
-		utils.Logger.WarnF("Failed to parse request body: %v", err)
+		utils.Logger.Warn("Failed to parse request body", utils.ErrorField, err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return nil, fmt.Errorf("")
 	}
 
 	if err = ValidateStruct(result); err != nil {
-		utils.Logger.InfoF("invalid input: %v", err)
+		utils.Logger.Info("invalid input", utils.ErrorField, err)
 		http.Error(w, "invalid input", http.StatusBadRequest)
 		return nil, fmt.Errorf("")
 	}

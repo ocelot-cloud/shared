@@ -28,12 +28,22 @@ import (
 	"time"
 )
 
+const (
+	DirectoryField        = "directory"
+	SizeInBytesField      = "size_in_bytes"
+	FolderToFindField     = "folder_to_find"
+	InitialDirField       = "initial_directory"
+	HostField             = "host"
+	CurrentAttemptField   = "current_attempt"
+	MaximumAttemptsFields = "maximum_attempts"
+)
+
 var Logger = ProvideLogger(os.Getenv("LOG_LEVEL"), true)
 
 func SendJsonResponse(w http.ResponseWriter, data interface{}) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		Logger.ErrorF("unmarshalling failed: %v", err)
+		Logger.Error("unmarshalling failed", ErrorField, err)
 		http.Error(w, "failed to prepare response data", http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +52,7 @@ func SendJsonResponse(w http.ResponseWriter, data interface{}) {
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonData)
 	if err != nil {
-		Logger.ErrorF("writing response failed: %v", err)
+		Logger.Error("writing response failed", ErrorField, err)
 		return
 	}
 }
@@ -173,7 +183,7 @@ func GetCorsDisablingHandler(next http.Handler) http.Handler {
 func GenerateCookie() (*http.Cookie, error) {
 	randomBytes := make([]byte, 32)
 	if _, err := rand.Read(randomBytes); err != nil {
-		Logger.ErrorF("Failed to generate cookie: %v", err)
+		Logger.Error("Failed to generate cookie", ErrorField, err)
 		return nil, err
 	}
 	return &http.Cookie{
@@ -193,7 +203,7 @@ func GetTimeInSevenDays() time.Time {
 func SaltAndHash(clearText string) (string, error) {
 	hashValue, err := bcrypt.GenerateFromPassword([]byte(clearText), bcrypt.DefaultCost)
 	if err != nil {
-		Logger.ErrorF("Failed to hash text: %v", err)
+		Logger.Error("failed to hash text", ErrorField, err)
 		return "", fmt.Errorf("hashing failed")
 	}
 	return string(hashValue), nil
@@ -207,7 +217,7 @@ func Hash(clearText string) (string, error) {
 	hashValue := sha256.New()
 	_, err := hashValue.Write([]byte(clearText))
 	if err != nil {
-		Logger.ErrorF("Failed to hash text: %v", err)
+		Logger.Error("failed to hash text", ErrorField, err)
 		return "", fmt.Errorf("hashing failed")
 	}
 	return hex.EncodeToString(hashValue.Sum(nil)), nil
@@ -275,7 +285,7 @@ func ZipDirectoryToBytes(dirPath string) ([]byte, error) {
 		return nil, err
 	}
 
-	Logger.InfoF("zipped files in directory %s into a file of %v bytes", dirPath, len(buf.Bytes()))
+	Logger.Info("zipped files in directory with size", DirectoryField, dirPath, SizeInBytesField, len(buf.Bytes()))
 	return buf.Bytes(), nil
 }
 
@@ -401,7 +411,8 @@ func FindDir(dirName string) string {
 	currentDir, err := os.Getwd()
 	initialDir := currentDir
 	if err != nil {
-		Logger.FatalF("Failed to get current dir: %v", err)
+		Logger.Error("failed to get current dir", ErrorField, err)
+		os.Exit(1)
 	}
 
 	for {
@@ -412,7 +423,8 @@ func FindDir(dirName string) string {
 
 		parentDir := filepath.Dir(currentDir)
 		if parentDir == currentDir { // Reached root folder
-			Logger.FatalF("folder '%s' not found in any parent directory. Initial directory was: %s", dirName, initialDir)
+			Logger.Error("folder not found in any parent directory", FolderToFindField, dirName, InitialDirField, initialDir)
+			os.Exit(1)
 		}
 
 		currentDir = parentDir
@@ -425,11 +437,12 @@ func RunMigrations(migrationsDir, host, port string) {
 		fmt.Sprintf("postgres://postgres@%s:%s/postgres?sslmode=disable", host, port),
 	)
 	if err != nil {
-		Logger.FatalF("Migration init failed: %v", err)
+		Logger.Error("migration init failed", ErrorField, err)
+		os.Exit(1)
 	}
 	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
-		Logger.FatalF("Migration failed: %v", err)
+		Logger.Error("migration failed", ErrorField, err)
 	}
 }
 
@@ -453,7 +466,7 @@ func WaitForPostgresDb(host, port string) (*sql.DB, error) {
 			}
 		}
 
-		Logger.InfoF("Waiting for postgres database at host '%s' to be ready... (%d/%d)", host, counter, attempts)
+		Logger.Info("waiting for postgres database to be ready", HostField, host, CurrentAttemptField, counter, MaximumAttemptsFields, attempts)
 		time.Sleep(1 * time.Second)
 	}
 	return dbClient, nil
@@ -465,14 +478,14 @@ type Closable interface {
 
 func Close(r Closable) {
 	if err := r.Close(); err != nil {
-		Logger.ErrorF("Failed to close: %v", err)
+		Logger.Error("failed to close", ErrorField, err)
 	}
 }
 
 func RemoveDir(path string) {
 	err := os.RemoveAll(path)
 	if err != nil {
-		Logger.ErrorF("Failed to delete temp directory: %v", err)
+		Logger.Error("Failed to delete temp directory", ErrorField, err)
 	}
 }
 

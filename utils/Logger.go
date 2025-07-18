@@ -13,6 +13,10 @@ import (
 	"time"
 )
 
+const (
+	ErrorField = "error"
+)
+
 var (
 	dataDir       = "data"
 	workDirectory string
@@ -45,19 +49,10 @@ func replaceSource(groups []string, a slog.Attr) slog.Attr {
 }
 
 type StructuredLogger interface {
-	/* TODO migration to new logger framework: resolve compilation errors in projects using the deprecated functions below; then remove deprecated functions and uncomment the following functions
 	Debug(msg string, kv ...any)
 	Info(msg string, kv ...any)
 	Warn(msg string, kv ...any)
 	Error(msg string, kv ...any)
-	*/
-
-	// Deprecated:
-	DebugF(format string, v ...any)
-	InfoF(format string, v ...any)
-	WarnF(format string, v ...any)
-	ErrorF(format string, v ...any)
-	FatalF(format string, v ...any)
 }
 
 // idea for later: add the software version to the log so that "source" attribute deterministally references its origin
@@ -159,10 +154,3 @@ func (m *myLogger) Debug(msg string, kv ...any) { m.log(slog.LevelDebug, msg, kv
 func (m *myLogger) Info(msg string, kv ...any)  { m.log(slog.LevelInfo, msg, kv...) }
 func (m *myLogger) Warn(msg string, kv ...any)  { m.log(slog.LevelWarn, msg, kv...) }
 func (m *myLogger) Error(msg string, kv ...any) { m.log(slog.LevelError, msg, kv...) }
-
-// Deprecated:
-func (m *myLogger) DebugF(f string, v ...any) { m.Debug(fmt.Sprintf(f, v...)) }
-func (m *myLogger) InfoF(f string, v ...any)  { m.Info(fmt.Sprintf(f, v...)) }
-func (m *myLogger) WarnF(f string, v ...any)  { m.Warn(fmt.Sprintf(f, v...)) }
-func (m *myLogger) ErrorF(f string, v ...any) { m.Error(fmt.Sprintf(f, v...)) }
-func (m *myLogger) FatalF(f string, v ...any) { m.Error(fmt.Sprintf(f, v...)); os.Exit(1) }
