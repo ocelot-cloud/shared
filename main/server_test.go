@@ -13,7 +13,7 @@ func TestPing(t *testing.T) {
 	client := &utils.ComponentClient{RootUrl: "http://localhost:8080"}
 	respBody, err := client.DoRequest("/ping", nil)
 	if err != nil {
-		t.Fatalf("Error making request: %v", err)
+		t.Fatalf("ErrorF making request: %v", err)
 	}
 
 	var responseString SingleString

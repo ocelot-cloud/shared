@@ -20,14 +20,14 @@ func main() {
 	go func() {
 		err := http.ListenAndServe(":8080", nil)
 		if err != nil {
-			utils.Logger.Error("Error starting server: %v", err)
+			utils.Logger.Error("ErrorF starting server: %v", err)
 			os.Exit(1)
 		}
 	}()
 
 	err := exec.Command("go", "test", "-v", "./...").Run()
 	if err != nil {
-		utils.Logger.Error("Tests failed: %v", err)
+		utils.Logger.ErrorF("Tests failed: %v", err)
 		os.Exit(1)
 	}
 

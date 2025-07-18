@@ -28,12 +28,12 @@ import (
 	"time"
 )
 
-var Logger = ProvideLogger(os.Getenv("LOG_LEVEL"))
+var Logger = ProvideLogger(os.Getenv("LOG_LEVEL"), true)
 
 func SendJsonResponse(w http.ResponseWriter, data interface{}) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		Logger.Error("unmarshalling failed: %v", err)
+		Logger.ErrorF("unmarshalling failed: %v", err)
 		http.Error(w, "failed to prepare response data", http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +42,7 @@ func SendJsonResponse(w http.ResponseWriter, data interface{}) {
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonData)
 	if err != nil {
-		Logger.Error("writing response failed: %v", err)
+		Logger.ErrorF("writing response failed: %v", err)
 		return
 	}
 }
@@ -173,7 +173,7 @@ func GetCorsDisablingHandler(next http.Handler) http.Handler {
 func GenerateCookie() (*http.Cookie, error) {
 	randomBytes := make([]byte, 32)
 	if _, err := rand.Read(randomBytes); err != nil {
-		Logger.Error("Failed to generate cookie: %v", err)
+		Logger.ErrorF("Failed to generate cookie: %v", err)
 		return nil, err
 	}
 	return &http.Cookie{
@@ -193,7 +193,7 @@ func GetTimeInSevenDays() time.Time {
 func SaltAndHash(clearText string) (string, error) {
 	hashValue, err := bcrypt.GenerateFromPassword([]byte(clearText), bcrypt.DefaultCost)
 	if err != nil {
-		Logger.Error("Failed to hash text: %v", err)
+		Logger.ErrorF("Failed to hash text: %v", err)
 		return "", fmt.Errorf("hashing failed")
 	}
 	return string(hashValue), nil
@@ -207,7 +207,7 @@ func Hash(clearText string) (string, error) {
 	hashValue := sha256.New()
 	_, err := hashValue.Write([]byte(clearText))
 	if err != nil {
-		Logger.Error("Failed to hash text: %v", err)
+		Logger.ErrorF("Failed to hash text: %v", err)
 		return "", fmt.Errorf("hashing failed")
 	}
 	return hex.EncodeToString(hashValue.Sum(nil)), nil
@@ -275,7 +275,7 @@ func ZipDirectoryToBytes(dirPath string) ([]byte, error) {
 		return nil, err
 	}
 
-	Logger.Info("zipped files in directory %s into a file of %v bytes", dirPath, len(buf.Bytes()))
+	Logger.InfoF("zipped files in directory %s into a file of %v bytes", dirPath, len(buf.Bytes()))
 	return buf.Bytes(), nil
 }
 
@@ -392,7 +392,7 @@ func Execute(commandStr string) {
 	command := exec.Command(commandParts[0], commandParts[1:]...) // #nosec G204 (CWE-78): Subprocess launched with a potential tainted input or cmd arguments; but required by design
 	err := command.Run()
 	if err != nil {
-		fmt.Printf("Error executing docker command: %v\n", err)
+		fmt.Printf("ErrorF executing docker command: %v\n", err)
 		os.Exit(1)
 	}
 }
@@ -401,7 +401,7 @@ func FindDir(dirName string) string {
 	currentDir, err := os.Getwd()
 	initialDir := currentDir
 	if err != nil {
-		Logger.Fatal("Failed to get current dir: %v", err)
+		Logger.FatalF("Failed to get current dir: %v", err)
 	}
 
 	for {
@@ -412,7 +412,7 @@ func FindDir(dirName string) string {
 
 		parentDir := filepath.Dir(currentDir)
 		if parentDir == currentDir { // Reached root folder
-			Logger.Fatal("folder '%s' not found in any parent directory. Initial directory was: %s", dirName, initialDir)
+			Logger.FatalF("folder '%s' not found in any parent directory. Initial directory was: %s", dirName, initialDir)
 		}
 
 		currentDir = parentDir
@@ -425,11 +425,11 @@ func RunMigrations(migrationsDir, host, port string) {
 		fmt.Sprintf("postgres://postgres@%s:%s/postgres?sslmode=disable", host, port),
 	)
 	if err != nil {
-		Logger.Fatal("Migration init failed: %v", err)
+		Logger.FatalF("Migration init failed: %v", err)
 	}
 	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
-		Logger.Fatal("Migration failed: %v", err)
+		Logger.FatalF("Migration failed: %v", err)
 	}
 }
 
@@ -453,7 +453,7 @@ func WaitForPostgresDb(host, port string) (*sql.DB, error) {
 			}
 		}
 
-		Logger.Info("Waiting for postgres database at host '%s' to be ready... (%d/%d)", host, counter, attempts)
+		Logger.InfoF("Waiting for postgres database at host '%s' to be ready... (%d/%d)", host, counter, attempts)
 		time.Sleep(1 * time.Second)
 	}
 	return dbClient, nil
@@ -465,14 +465,14 @@ type Closable interface {
 
 func Close(r Closable) {
 	if err := r.Close(); err != nil {
-		Logger.Error("Failed to close: %v", err)
+		Logger.ErrorF("Failed to close: %v", err)
 	}
 }
 
 func RemoveDir(path string) {
 	err := os.RemoveAll(path)
 	if err != nil {
-		Logger.Error("Failed to delete temp directory: %v", err)
+		Logger.ErrorF("Failed to delete temp directory: %v", err)
 	}
 }
 
@@ -482,7 +482,7 @@ func AnalyzeCode(tr *taskrunner.TaskRunner, dir string) {
 
 	buildTags, err := CollectBuildTags(dir)
 	if err != nil {
-		tr.Log.Error("Error collecting build tags: %s", err.Error())
+		tr.Log.Error("ErrorF collecting build tags: %s", err.Error())
 		os.Exit(1)
 	}
 	if len(buildTags) == 0 {
