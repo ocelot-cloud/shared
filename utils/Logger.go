@@ -212,7 +212,6 @@ type DetailedError struct {
 	Context      map[string]any
 }
 
-// TODO implement and test: error message context1=value1 context2=value2\nstack trace
 func (d *DetailedError) Error() string {
 	var result = d.ErrorMessage
 	for k, v := range d.Context {
