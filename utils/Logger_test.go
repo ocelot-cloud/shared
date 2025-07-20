@@ -18,32 +18,31 @@ func TestLoggingVisually(t *testing.T) {
 	logger.Error("This is an info message", ErrorField, "some-error")
 	logger.Error("This is an info message", ErrorField, errors.New("some-error"))
 
-	logger.Error(subfunction(logger).Error())
+	logger.Error("testing normal error", ErrorField, errors.New("some-error"), "key1", "value1")
+}
+
+func TestLoggingWithStackTrace(t *testing.T) {
+	logger := ProvideLogger("debug", true)
+	logger.Error("testing detailed error", ErrorField, subfunction(logger))
 }
 
 func subfunction(logger StructuredLogger) error {
-	return logger.NewError("an error occurred", "key1", "value1", "key2", "value2")
+	return logger.NewError("an error occurred", "key1", "value1")
 }
 
 func TestErrorToString(t *testing.T) {
 	logger := ProvideLogger("debug", true)
 	testError := logger.NewError("an error occurred", "key1", "value1")
+
+	detailedTestError, ok := testError.(*DetailedError)
+	assert.True(t, ok)
+	assert.Equal(t, "an error occurred", detailedTestError.ErrorMessage)
+	assert.Equal(t, 1, len(detailedTestError.Context))
+	assert.Equal(t, "value1", detailedTestError.Context["key1"])
+	assert.NotEqual(t, "", detailedTestError.ErrorStack)
+
 	errorString := testError.Error()
 	assert.True(t, strings.HasPrefix(errorString, "an error occurred key1=value1\nstack trace:\n"))
 }
 
-/* TODO I want smart error logging with structured logging and stack traces, plan:
-type OcError struct {
-	errorMessage string
-	errorStack   string
-	Context 	 map[string]any
-}
-
-* logger.CreateError()
-* high level function logs the error; prints the error message and context in a single line, and below that with pretty formatting is the stack trace
-* func AddContext(string...) -> make sure its two args, the odd index arg must be string, the even index arg can be of any type
-* when some methods are not used correctly, e.g. type errors etc, then an error should be logged as the developer used it wrongly
-* actually very lightweight as the error object is not recreated all the time, but you rather add changes directly to the existing error object
-* condition: all errors must be created through my logging library, so that the stack trace is always available, and operations work; using operations on "normal" errors should work but will cause an error log for the developer
-* maybe I should create a small, reusable library for that
-*/
+// TODO maybe I should create a small, reusable logging library in a separate repository

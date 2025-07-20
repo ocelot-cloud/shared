@@ -28,11 +28,18 @@ func init() {
 	if err != nil {
 		panic(fmt.Sprintf("cannot determine working dir: %v", err))
 	}
-	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
-		if err := os.MkdirAll(dataDir, 0700); err != nil {
+	if _, err = os.Stat(dataDir); os.IsNotExist(err) {
+		if err = os.MkdirAll(dataDir, 0700); err != nil {
 			panic(fmt.Sprintf("Error creating data directory: %v", err))
 		}
 	}
+}
+
+func dropStackTrace(groups []string, a slog.Attr) slog.Attr {
+	if a.Key == "stack_trace" {
+		return slog.Attr{}
+	}
+	return replaceSource(groups, a)
 }
 
 func replaceSource(groups []string, a slog.Attr) slog.Attr {
@@ -96,7 +103,7 @@ func ProvideLogger(logLevel string, showCaller bool) StructuredLogger {
 	consoleHandler := tint.NewHandler(os.Stdout, &tint.Options{
 		AddSource:   showCaller,
 		Level:       slogLogLevel,
-		ReplaceAttr: replaceSource,
+		ReplaceAttr: dropStackTrace,
 	})
 
 	logger := slog.New(multiHandler{fileHandler, consoleHandler})
@@ -136,19 +143,48 @@ func (h multiHandler) WithGroup(name string) slog.Handler {
 
 type myLogger struct{ l *slog.Logger }
 
+// TODO this should be unit tested; introduce interface hiding slog; ProvideLogger should set this interface
 func (m *myLogger) log(level slog.Level, msg string, kv ...any) {
+	// TODO refactoring: extract to shouldLogBeSkipped function
 	if !m.l.Handler().Enabled(context.Background(), level) {
 		return
 	}
+
+	// TODO refactoring: extract to createRecord function
 	var pcs [1]uintptr
 	runtime.Callers(3, pcs[:])
 	rec := slog.NewRecord(time.Now(), level, msg, pcs[0])
+
+	var stackTrace string
+
 	for i := 0; i+1 < len(kv); i += 2 {
-		if k, ok := kv[i].(string); ok {
-			rec.AddAttrs(slog.Any(k, kv[i+1]))
+		key, ok := kv[i].(string)
+		if !ok {
+			m.Warn("invalid key type in log message, must always be string", "key", key)
+			continue
+		}
+
+		if key == ErrorField {
+			detailedError, ok := kv[i+1].(*DetailedError)
+			if ok {
+				for k, v := range detailedError.Context {
+					rec.AddAttrs(slog.Any(k, v))
+				}
+				rec.AddAttrs(slog.Any("stack_trace", detailedError.ErrorStack))
+				stackTrace = detailedError.ErrorStack
+				m.log(level, msg)
+			} else {
+				m.Warn("invalid error type in log message, must be *DetailedError")
+				rec.AddAttrs(slog.Any(key, kv[i+1]))
+			}
+		} else {
+			rec.AddAttrs(slog.Any(key, kv[i+1]))
 		}
 	}
 	_ = m.l.Handler().Handle(context.Background(), rec)
+	if stackTrace != "" {
+		println(stackTrace)
+	}
 }
 
 func (m *myLogger) Debug(msg string, kv ...any) { m.log(slog.LevelDebug, msg, kv...) }
