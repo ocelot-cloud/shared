@@ -148,7 +148,8 @@ type myLogger struct {
 
 type SubLogger interface {
 	ShouldLogBeSkipped(level slog.Level) bool
-	CreateSlogRecord(level slog.Level, msg string) slog.Record
+	CreateLogRecord(level slog.Level, msg string) *LogRecord
+	HandleRecord(logRecord *LogRecord)
 }
 
 type SubLoggerImpl struct {
@@ -159,10 +160,34 @@ func (s *SubLoggerImpl) ShouldLogBeSkipped(level slog.Level) bool {
 	return !s.slog.Handler().Enabled(context.Background(), level)
 }
 
-func (s *SubLoggerImpl) CreateSlogRecord(level slog.Level, msg string) slog.Record {
+func (s *SubLoggerImpl) HandleRecord(logRecord *LogRecord) {
 	var pcs [1]uintptr
 	runtime.Callers(3, pcs[:])
-	return slog.NewRecord(time.Now(), level, msg, pcs[0])
+	slogRecord := slog.NewRecord(time.Now(), logRecord.level, logRecord.msg, pcs[0])
+
+	for key, value := range logRecord.attributes {
+		slogRecord.AddAttrs(slog.Any(key, value))
+	}
+
+	_ = s.slog.Handler().Handle(context.Background(), slogRecord)
+}
+
+func (s *SubLoggerImpl) CreateLogRecord(level slog.Level, msg string) *LogRecord {
+	return &LogRecord{
+		level:      level,
+		msg:        msg,
+		attributes: make(map[string]any),
+	}
+}
+
+type LogRecord struct {
+	level      slog.Level
+	msg        string
+	attributes map[string]any
+}
+
+func (r *LogRecord) AddAttrs(key string, value any) {
+	r.attributes[key] = value
 }
 
 // TODO this should be unit tested; introduce interface hiding slog; ProvideLogger should set this interface
@@ -171,7 +196,7 @@ func (m *myLogger) log(level slog.Level, msg string, kv ...any) {
 		return
 	}
 
-	rec := m.logger.CreateSlogRecord(level, msg)
+	rec := m.logger.CreateLogRecord(level, msg)
 	var stackTrace string
 
 	for i := 0; i+1 < len(kv); i += 2 {
@@ -185,20 +210,20 @@ func (m *myLogger) log(level slog.Level, msg string, kv ...any) {
 			detailedError, ok := kv[i+1].(*DetailedError)
 			if ok {
 				for k, v := range detailedError.Context {
-					rec.AddAttrs(slog.Any(k, v))
+					rec.AddAttrs(k, v)
 				}
-				rec.AddAttrs(slog.Any("stack_trace", detailedError.ErrorStack))
+				rec.AddAttrs("stack_trace", detailedError.ErrorStack)
 				stackTrace = detailedError.ErrorStack
 				m.log(level, msg)
 			} else {
 				m.Warn("invalid error type in log message, must be *DetailedError")
-				rec.AddAttrs(slog.Any(key, kv[i+1]))
+				rec.AddAttrs(key, kv[i+1])
 			}
 		} else {
-			rec.AddAttrs(slog.Any(key, kv[i+1]))
+			rec.AddAttrs(key, kv[i+1])
 		}
 	}
-	_ = m.l.Handler().Handle(context.Background(), rec)
+	m.logger.HandleRecord(rec)
 	if stackTrace != "" {
 		println(stackTrace)
 	}
