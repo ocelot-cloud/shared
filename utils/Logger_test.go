@@ -2,6 +2,8 @@ package utils
 
 import (
 	"errors"
+	"github.com/ocelot-cloud/shared/assert"
+	"strings"
 	"testing"
 )
 
@@ -13,8 +15,21 @@ func TestLoggingVisually(t *testing.T) {
 	logger.Error("This is an error message")
 
 	logger.Info("This is an info message", "key1", "value1", "key2", "value2")
-	logger.Error("This is an info message", "error", "some-error")             // TODO
-	logger.Error("This is an info message", "error", errors.New("some-error")) // TODO
+	logger.Error("This is an info message", ErrorField, "some-error")
+	logger.Error("This is an info message", ErrorField, errors.New("some-error"))
+
+	logger.Error(subfunction(logger).Error())
+}
+
+func subfunction(logger StructuredLogger) error {
+	return logger.NewError("an error occurred", "key1", "value1", "key2", "value2")
+}
+
+func TestErrorToString(t *testing.T) {
+	logger := ProvideLogger("debug", true)
+	testError := logger.NewError("an error occurred", "key1", "value1")
+	errorString := testError.Error()
+	assert.True(t, strings.HasPrefix(errorString, "an error occurred key1=value1\nstack trace:\n"))
 }
 
 /* TODO I want smart error logging with structured logging and stack traces, plan:

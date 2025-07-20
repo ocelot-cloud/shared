@@ -53,6 +53,7 @@ type StructuredLogger interface {
 	Info(msg string, kv ...any)
 	Warn(msg string, kv ...any)
 	Error(msg string, kv ...any)
+	NewError(msg string, kv ...any) error
 }
 
 // idea for later: add the software version to the log so that "source" attribute deterministally references its origin
@@ -154,3 +155,48 @@ func (m *myLogger) Debug(msg string, kv ...any) { m.log(slog.LevelDebug, msg, kv
 func (m *myLogger) Info(msg string, kv ...any)  { m.log(slog.LevelInfo, msg, kv...) }
 func (m *myLogger) Warn(msg string, kv ...any)  { m.log(slog.LevelWarn, msg, kv...) }
 func (m *myLogger) Error(msg string, kv ...any) { m.log(slog.LevelError, msg, kv...) }
+func (m *myLogger) NewError(msg string, kv ...any) error {
+	var contextMap = make(map[string]any)
+	for i := 0; i+1 < len(kv); i += 2 {
+		if k, ok := kv[i].(string); ok {
+			contextMap[k] = kv[i+1]
+		}
+	}
+
+	return &DetailedError{
+		ErrorMessage: msg,
+		ErrorStack:   printStackTrace(),
+		Context:      contextMap,
+	}
+}
+
+type DetailedError struct {
+	ErrorMessage string
+	ErrorStack   string
+	Context      map[string]any
+}
+
+// TODO implement and test: error message context1=value1 context2=value2\nstack trace
+func (d *DetailedError) Error() string {
+	var result = d.ErrorMessage
+	for k, v := range d.Context {
+		result += fmt.Sprintf(" %s=%v", k, v)
+	}
+	result += "\nstack trace:\n" + d.ErrorStack
+	return result
+}
+
+func printStackTrace() string {
+	pcs := make([]uintptr, 32)
+	n := runtime.Callers(3, pcs)
+	frames := runtime.CallersFrames(pcs[:n])
+	var b strings.Builder
+	for {
+		f, more := frames.Next()
+		fmt.Fprintf(&b, "%s\n\t%s:%d\n", f.Function, f.File, f.Line)
+		if !more {
+			break
+		}
+	}
+	return b.String()
+}
