@@ -150,10 +150,15 @@ type SubLogger interface {
 	ShouldLogBeSkipped(level slog.Level) bool
 	CreateLogRecord(level slog.Level, msg string) *LogRecord
 	HandleRecord(logRecord *LogRecord)
+	Println(message string)
 }
 
 type SubLoggerImpl struct {
 	slog *slog.Logger
+}
+
+func (s *SubLoggerImpl) Println(message string) {
+	println(message)
 }
 
 func (s *SubLoggerImpl) ShouldLogBeSkipped(level slog.Level) bool {
@@ -225,7 +230,7 @@ func (m *myLogger) log(level slog.Level, msg string, kv ...any) {
 	}
 	m.logger.HandleRecord(rec)
 	if stackTrace != "" {
-		println(stackTrace)
+		m.logger.Println(stackTrace)
 	}
 }
 
