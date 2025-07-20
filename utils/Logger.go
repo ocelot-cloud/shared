@@ -107,7 +107,7 @@ func ProvideLogger(logLevel string, showCaller bool) StructuredLogger {
 	})
 
 	logger := slog.New(multiHandler{fileHandler, consoleHandler})
-	return &myLogger{logger}
+	return &myLogger{logger, &SubLoggerImpl{slog: logger}}
 }
 
 type multiHandler []slog.Handler
@@ -141,20 +141,37 @@ func (h multiHandler) WithGroup(name string) slog.Handler {
 	return out
 }
 
-type myLogger struct{ l *slog.Logger }
+type myLogger struct {
+	l      *slog.Logger
+	logger SubLogger
+}
+
+type SubLogger interface {
+	ShouldLogBeSkipped(level slog.Level) bool
+	CreateSlogRecord(level slog.Level, msg string) slog.Record
+}
+
+type SubLoggerImpl struct {
+	slog *slog.Logger
+}
+
+func (s *SubLoggerImpl) ShouldLogBeSkipped(level slog.Level) bool {
+	return !s.slog.Handler().Enabled(context.Background(), level)
+}
+
+func (s *SubLoggerImpl) CreateSlogRecord(level slog.Level, msg string) slog.Record {
+	var pcs [1]uintptr
+	runtime.Callers(3, pcs[:])
+	return slog.NewRecord(time.Now(), level, msg, pcs[0])
+}
 
 // TODO this should be unit tested; introduce interface hiding slog; ProvideLogger should set this interface
 func (m *myLogger) log(level slog.Level, msg string, kv ...any) {
-	// TODO refactoring: extract to shouldLogBeSkipped function
-	if !m.l.Handler().Enabled(context.Background(), level) {
+	if m.logger.ShouldLogBeSkipped(level) {
 		return
 	}
 
-	// TODO refactoring: extract to createRecord function
-	var pcs [1]uintptr
-	runtime.Callers(3, pcs[:])
-	rec := slog.NewRecord(time.Now(), level, msg, pcs[0])
-
+	rec := m.logger.CreateSlogRecord(level, msg)
 	var stackTrace string
 
 	for i := 0; i+1 < len(kv); i += 2 {
