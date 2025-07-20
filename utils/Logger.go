@@ -78,20 +78,7 @@ func ProvideLogger(logLevel string, showCaller bool) StructuredLogger {
 		Compress:   true,
 	}
 
-	sanitizedLogLevel := strings.ToLower(logLevel)
-	var slogLogLevel slog.Level
-	switch sanitizedLogLevel {
-	case "debug":
-		slogLogLevel = slog.LevelDebug
-	case "info":
-		slogLogLevel = slog.LevelInfo
-	case "warn":
-		slogLogLevel = slog.LevelWarn
-	case "error":
-		slogLogLevel = slog.LevelError
-	default:
-		slogLogLevel = slog.LevelInfo
-	}
+	slogLogLevel := convertToSlogLevel(logLevel)
 
 	opts := &slog.HandlerOptions{
 		AddSource:   showCaller,
@@ -108,6 +95,22 @@ func ProvideLogger(logLevel string, showCaller bool) StructuredLogger {
 
 	logger := slog.New(multiHandler{fileHandler, consoleHandler})
 	return &myLogger{logger, &SubLoggerImpl{slog: logger}}
+}
+
+var logLevelMap = map[string]slog.Level{
+	"debug": slog.LevelDebug,
+	"info":  slog.LevelInfo,
+	"warn":  slog.LevelWarn,
+	"error": slog.LevelError,
+}
+
+func convertToSlogLevel(logLevel string) slog.Level {
+	lvl, ok := logLevelMap[strings.ToLower(logLevel)]
+	if ok {
+		return lvl
+	} else {
+		return slog.LevelInfo
+	}
 }
 
 type multiHandler []slog.Handler
@@ -147,8 +150,8 @@ type myLogger struct {
 }
 
 type SubLogger interface {
-	ShouldLogBeSkipped(level slog.Level) bool
-	CreateLogRecord(level slog.Level, msg string) *LogRecord
+	ShouldLogBeSkipped(level string) bool
+	CreateLogRecord(level string, msg string) *LogRecord
 	HandleRecord(logRecord *LogRecord)
 	Println(message string)
 }
@@ -161,14 +164,16 @@ func (s *SubLoggerImpl) Println(message string) {
 	println(message)
 }
 
-func (s *SubLoggerImpl) ShouldLogBeSkipped(level slog.Level) bool {
-	return !s.slog.Handler().Enabled(context.Background(), level)
+func (s *SubLoggerImpl) ShouldLogBeSkipped(level string) bool {
+	slogLevel := convertToSlogLevel(level)
+	return !s.slog.Handler().Enabled(context.Background(), slogLevel)
 }
 
 func (s *SubLoggerImpl) HandleRecord(logRecord *LogRecord) {
 	var pcs [1]uintptr
 	runtime.Callers(3, pcs[:])
-	slogRecord := slog.NewRecord(time.Now(), logRecord.level, logRecord.msg, pcs[0])
+	slogLevel := convertToSlogLevel(logRecord.level)
+	slogRecord := slog.NewRecord(time.Now(), slogLevel, logRecord.msg, pcs[0])
 
 	for key, value := range logRecord.attributes {
 		slogRecord.AddAttrs(slog.Any(key, value))
@@ -177,7 +182,7 @@ func (s *SubLoggerImpl) HandleRecord(logRecord *LogRecord) {
 	_ = s.slog.Handler().Handle(context.Background(), slogRecord)
 }
 
-func (s *SubLoggerImpl) CreateLogRecord(level slog.Level, msg string) *LogRecord {
+func (s *SubLoggerImpl) CreateLogRecord(level string, msg string) *LogRecord {
 	return &LogRecord{
 		level:      level,
 		msg:        msg,
@@ -186,7 +191,7 @@ func (s *SubLoggerImpl) CreateLogRecord(level slog.Level, msg string) *LogRecord
 }
 
 type LogRecord struct {
-	level      slog.Level
+	level      string
 	msg        string
 	attributes map[string]any
 }
@@ -196,7 +201,7 @@ func (r *LogRecord) AddAttrs(key string, value any) {
 }
 
 // TODO this should be unit tested; introduce interface hiding slog; ProvideLogger should set this interface
-func (m *myLogger) log(level slog.Level, msg string, kv ...any) {
+func (m *myLogger) log(level string, msg string, kv ...any) {
 	if m.logger.ShouldLogBeSkipped(level) {
 		return
 	}
@@ -234,10 +239,10 @@ func (m *myLogger) log(level slog.Level, msg string, kv ...any) {
 	}
 }
 
-func (m *myLogger) Debug(msg string, kv ...any) { m.log(slog.LevelDebug, msg, kv...) }
-func (m *myLogger) Info(msg string, kv ...any)  { m.log(slog.LevelInfo, msg, kv...) }
-func (m *myLogger) Warn(msg string, kv ...any)  { m.log(slog.LevelWarn, msg, kv...) }
-func (m *myLogger) Error(msg string, kv ...any) { m.log(slog.LevelError, msg, kv...) }
+func (m *myLogger) Debug(msg string, kv ...any) { m.log("debug", msg, kv...) }
+func (m *myLogger) Info(msg string, kv ...any)  { m.log("info", msg, kv...) }
+func (m *myLogger) Warn(msg string, kv ...any)  { m.log("warn", msg, kv...) }
+func (m *myLogger) Error(msg string, kv ...any) { m.log("error", msg, kv...) }
 func (m *myLogger) NewError(msg string, kv ...any) error {
 	var contextMap = make(map[string]any)
 	for i := 0; i+1 < len(kv); i += 2 {
