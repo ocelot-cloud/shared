@@ -136,6 +136,7 @@ func (h multiHandler) WithAttrs(a []slog.Attr) slog.Handler {
 	}
 	return out
 }
+
 func (h multiHandler) WithGroup(name string) slog.Handler {
 	out := make(multiHandler, len(h))
 	for i, hd := range h {
