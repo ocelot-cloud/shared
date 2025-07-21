@@ -3,6 +3,7 @@ package validation
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/ocelot-cloud/deepstack"
 	"github.com/ocelot-cloud/shared/utils"
 	"io"
 	"net/http"
@@ -173,20 +174,20 @@ func ReadBody[T any](w http.ResponseWriter, r *http.Request) (*T, error) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		utils.Logger.Warn("Failed to read request body", utils.ErrorField, err)
+		utils.Logger.Warn("Failed to read request body", deepstack.ErrorField, err)
 		http.Error(w, "unable to read request body", http.StatusBadRequest)
 		return nil, fmt.Errorf("")
 	}
 	defer utils.Close(r.Body)
 
 	if err = json.Unmarshal(body, &result); err != nil {
-		utils.Logger.Warn("Failed to parse request body", utils.ErrorField, err)
+		utils.Logger.Warn("Failed to parse request body", deepstack.ErrorField, err)
 		http.Error(w, "invalid request body", http.StatusBadRequest)
 		return nil, fmt.Errorf("")
 	}
 
 	if err = ValidateStruct(result); err != nil {
-		utils.Logger.Info("invalid input", utils.ErrorField, err)
+		utils.Logger.Info("invalid input", deepstack.ErrorField, err)
 		http.Error(w, "invalid input", http.StatusBadRequest)
 		return nil, fmt.Errorf("")
 	}

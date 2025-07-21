@@ -16,6 +16,7 @@ import (
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	_ "github.com/lib/pq"
+	"github.com/ocelot-cloud/deepstack"
 	"github.com/ocelot-cloud/task-runner"
 	"golang.org/x/crypto/bcrypt"
 	"io"
@@ -38,12 +39,12 @@ const (
 	MaximumAttemptsFields = "maximum_attempts"
 )
 
-var Logger = ProvideLogger(os.Getenv("LOG_LEVEL"), true)
+var Logger = deepstack.NewDeepStackLogger(os.Getenv("LOG_LEVEL"), true)
 
 func SendJsonResponse(w http.ResponseWriter, data interface{}) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
-		Logger.Error("unmarshalling failed", ErrorField, err)
+		Logger.Error("unmarshalling failed", deepstack.ErrorField, err)
 		http.Error(w, "failed to prepare response data", http.StatusInternalServerError)
 		return
 	}
@@ -52,7 +53,7 @@ func SendJsonResponse(w http.ResponseWriter, data interface{}) {
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(jsonData)
 	if err != nil {
-		Logger.Error("writing response failed", ErrorField, err)
+		Logger.Error("writing response failed", deepstack.ErrorField, err)
 		return
 	}
 }
@@ -183,7 +184,7 @@ func GetCorsDisablingHandler(next http.Handler) http.Handler {
 func GenerateCookie() (*http.Cookie, error) {
 	randomBytes := make([]byte, 32)
 	if _, err := rand.Read(randomBytes); err != nil {
-		Logger.Error("Failed to generate cookie", ErrorField, err)
+		Logger.Error("Failed to generate cookie", deepstack.ErrorField, err)
 		return nil, err
 	}
 	return &http.Cookie{
@@ -203,7 +204,7 @@ func GetTimeInSevenDays() time.Time {
 func SaltAndHash(clearText string) (string, error) {
 	hashValue, err := bcrypt.GenerateFromPassword([]byte(clearText), bcrypt.DefaultCost)
 	if err != nil {
-		Logger.Error("failed to hash text", ErrorField, err)
+		Logger.Error("failed to hash text", deepstack.ErrorField, err)
 		return "", fmt.Errorf("hashing failed")
 	}
 	return string(hashValue), nil
@@ -217,7 +218,7 @@ func Hash(clearText string) (string, error) {
 	hashValue := sha256.New()
 	_, err := hashValue.Write([]byte(clearText))
 	if err != nil {
-		Logger.Error("failed to hash text", ErrorField, err)
+		Logger.Error("failed to hash text", deepstack.ErrorField, err)
 		return "", fmt.Errorf("hashing failed")
 	}
 	return hex.EncodeToString(hashValue.Sum(nil)), nil
@@ -411,7 +412,7 @@ func FindDir(dirName string) string {
 	currentDir, err := os.Getwd()
 	initialDir := currentDir
 	if err != nil {
-		Logger.Error("failed to get current dir", ErrorField, err)
+		Logger.Error("failed to get current dir", deepstack.ErrorField, err)
 		os.Exit(1)
 	}
 
@@ -437,12 +438,12 @@ func RunMigrations(migrationsDir, host, port string) {
 		fmt.Sprintf("postgres://postgres@%s:%s/postgres?sslmode=disable", host, port),
 	)
 	if err != nil {
-		Logger.Error("migration init failed", ErrorField, err)
+		Logger.Error("migration init failed", deepstack.ErrorField, err)
 		os.Exit(1)
 	}
 	err = m.Up()
 	if err != nil && err != migrate.ErrNoChange {
-		Logger.Error("migration failed", ErrorField, err)
+		Logger.Error("migration failed", deepstack.ErrorField, err)
 	}
 }
 
@@ -478,14 +479,14 @@ type Closable interface {
 
 func Close(r Closable) {
 	if err := r.Close(); err != nil {
-		Logger.Error("failed to close", ErrorField, err)
+		Logger.Error("failed to close", deepstack.ErrorField, err)
 	}
 }
 
 func RemoveDir(path string) {
 	err := os.RemoveAll(path)
 	if err != nil {
-		Logger.Error("Failed to delete temp directory", ErrorField, err)
+		Logger.Error("Failed to delete temp directory", deepstack.ErrorField, err)
 	}
 }
 

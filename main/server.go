@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/ocelot-cloud/deepstack"
 	"github.com/ocelot-cloud/shared/utils"
 	"net/http"
 	"os"
@@ -20,14 +21,14 @@ func main() {
 	go func() {
 		err := http.ListenAndServe(":8080", nil)
 		if err != nil {
-			utils.Logger.Error("ErrorF starting server", utils.ErrorField, err)
+			utils.Logger.Error("ErrorF starting server", deepstack.ErrorField, err)
 			os.Exit(1)
 		}
 	}()
 
 	err := exec.Command("go", "test", "-v", "./...").Run()
 	if err != nil {
-		utils.Logger.Error("Tests failed", utils.ErrorField, err)
+		utils.Logger.Error("Tests failed", deepstack.ErrorField, err)
 		os.Exit(1)
 	}
 
