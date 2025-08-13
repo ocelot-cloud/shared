@@ -110,7 +110,7 @@ func TestValidateStruct(t *testing.T) {
 
 	testCases := []struct {
 		name            string
-		input           interface{}
+		input           any
 		expectedMessage string
 	}{
 		{"valid struct", validStruct{"ocelotcloud"}, ""},

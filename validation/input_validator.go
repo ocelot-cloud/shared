@@ -30,7 +30,7 @@ var ValidationTypeMap = map[string]*regexp.Regexp{
 	"email_or_empty":   regexp.MustCompile(`^$|^` + emailRegexSuffix),
 }
 
-func ValidateStruct(s interface{}) error {
+func ValidateStruct(s any) error {
 	reflectionObject := getReflectionObject(s)
 	fieldType := reflectionObject.Type()
 
@@ -49,7 +49,7 @@ func ValidateStruct(s interface{}) error {
 	return nil
 }
 
-func getReflectionObject(s interface{}) reflect.Value {
+func getReflectionObject(s any) reflect.Value {
 	object := reflect.ValueOf(s)
 	for object.Kind() == reflect.Ptr && !object.IsNil() {
 		object = object.Elem()

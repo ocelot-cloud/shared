@@ -12,13 +12,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/golang-migrate/migrate/v4"
-	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
-	_ "github.com/lib/pq"
-	"github.com/ocelot-cloud/deepstack"
-	"github.com/ocelot-cloud/task-runner"
-	"golang.org/x/crypto/bcrypt"
 	"io"
 	"io/fs"
 	"net/http"
@@ -27,6 +20,14 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/golang-migrate/migrate/v4"
+	_ "github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/lib/pq"
+	"github.com/ocelot-cloud/deepstack"
+	"github.com/ocelot-cloud/task-runner"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const (
@@ -39,9 +40,9 @@ const (
 	MaximumAttemptsFields = "maximum_attempts"
 )
 
-var Logger = deepstack.NewDeepStackLogger(os.Getenv("LOG_LEVEL"), true)
+var Logger = deepstack.NewDeepStackLogger(os.Getenv("LOG_LEVEL"))
 
-func SendJsonResponse(w http.ResponseWriter, data interface{}) {
+func SendJsonResponse(w http.ResponseWriter, data any) {
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		Logger.Error("unmarshalling failed", deepstack.ErrorField, err)
@@ -66,7 +67,7 @@ type ComponentClient struct {
 	VerifyCertificate bool
 }
 
-func (c *ComponentClient) DoRequest(path string, payload interface{}) ([]byte, error) {
+func (c *ComponentClient) DoRequest(path string, payload any) ([]byte, error) {
 	resp, err := c.DoRequestWithFullResponse(path, payload)
 	if err != nil {
 		return nil, err
@@ -80,7 +81,7 @@ func (c *ComponentClient) DoRequest(path string, payload interface{}) ([]byte, e
 	return respBody, nil
 }
 
-func (c *ComponentClient) DoRequestWithFullResponse(path string, payload interface{}) (*http.Response, error) {
+func (c *ComponentClient) DoRequestWithFullResponse(path string, payload any) (*http.Response, error) {
 	url := c.RootUrl + path
 
 	payloadBytes, err := json.Marshal(payload)
@@ -290,7 +291,7 @@ func ZipDirectoryToBytes(dirPath string) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func UnpackResponse[T any](object interface{}) (*T, error) {
+func UnpackResponse[T any](object any) (*T, error) {
 	respBody, ok := object.([]byte)
 	if !ok {
 		return nil, fmt.Errorf("failed to assert result to []byte")

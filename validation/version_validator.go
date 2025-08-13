@@ -120,7 +120,7 @@ func checkAppYamlCorrectness(filePath string) error {
 		return fmt.Errorf("failed to read app.yml: %v", err)
 	}
 
-	var appConfig map[string]interface{}
+	var appConfig map[string]any
 	if err := yaml.Unmarshal(data, &appConfig); err != nil {
 		return fmt.Errorf("failed to parse app.yml: %v", err)
 	}
@@ -187,12 +187,12 @@ func parseAndValidateComposeFile(composePath, maintainerName, appName string) er
 	return nil
 }
 
-func readComposeFile(composePath string) (map[string]interface{}, error) {
+func readComposeFile(composePath string) (map[string]any, error) {
 	data, err := os.ReadFile(composePath) // #nosec G304 (CWE-22): Potential file inclusion via variable; no problem since it is called internally
 	if err != nil {
 		return nil, fmt.Errorf("failed to read docker-compose.yml: %v", err)
 	}
-	var c map[string]interface{}
+	var c map[string]any
 	if err := yaml.Unmarshal(data, &c); err != nil {
 		return nil, fmt.Errorf("failed to parse docker-compose.yml: %v", err)
 	}
@@ -202,7 +202,7 @@ func readComposeFile(composePath string) (map[string]interface{}, error) {
 	return c, nil
 }
 
-func validateTopLevelKeys(compose map[string]interface{}) error {
+func validateTopLevelKeys(compose map[string]any) error {
 	allowed := map[string]bool{"volumes": true, "services": true}
 	for k := range compose {
 		if !allowed[k] {
@@ -212,14 +212,14 @@ func validateTopLevelKeys(compose map[string]interface{}) error {
 	return nil
 }
 
-func validateServices(compose map[string]interface{}, maintainerName, appName string) error {
-	services, ok := compose["services"].(map[string]interface{})
+func validateServices(compose map[string]any, maintainerName, appName string) error {
+	services, ok := compose["services"].(map[string]any)
 	if !ok {
 		return fmt.Errorf("invalid 'services' section in docker-compose.yml")
 	}
 	isMainServicePresent := false
 	for serviceName, serviceValue := range services {
-		serviceMap, ok := serviceValue.(map[string]interface{})
+		serviceMap, ok := serviceValue.(map[string]any)
 		if !ok {
 			return fmt.Errorf("invalid service definition for service %v", serviceName)
 		}
@@ -257,7 +257,7 @@ func validateServices(compose map[string]interface{}, maintainerName, appName st
 	return nil
 }
 
-func validateServiceKeys(serviceName string, serviceMap map[string]interface{}) error {
+func validateServiceKeys(serviceName string, serviceMap map[string]any) error {
 	allowed := []string{"image", "container_name", "ports", "volumes", "depends_on", "environment", "deploy", "tmpfs", "tty", "user", "command", "entrypoint"}
 	for k := range serviceMap {
 		found := false
@@ -274,7 +274,7 @@ func validateServiceKeys(serviceName string, serviceMap map[string]interface{}) 
 	return nil
 }
 
-func validateImage(serviceName string, serviceMap map[string]interface{}) error {
+func validateImage(serviceName string, serviceMap map[string]any) error {
 	img, ok := serviceMap["image"]
 	if !ok {
 		return fmt.Errorf("service '%s' must have 'image' keyword", serviceName)
@@ -289,7 +289,7 @@ func validateImage(serviceName string, serviceMap map[string]interface{}) error 
 	return nil
 }
 
-func validateContainerName(serviceMap map[string]interface{}, maintainerName, appName string) error {
+func validateContainerName(serviceMap map[string]any, maintainerName, appName string) error {
 	cn, ok := serviceMap["container_name"]
 	if !ok {
 		return errors.New(containerNameMissing)
@@ -301,7 +301,7 @@ func validateContainerName(serviceMap map[string]interface{}, maintainerName, ap
 	return nil
 }
 
-func validateMainServiceContainerName(serviceName string, serviceMap map[string]interface{}, maintainerName, appName string) error {
+func validateMainServiceContainerName(serviceName string, serviceMap map[string]any, maintainerName, appName string) error {
 	acn, ok := serviceMap["container_name"]
 	if !ok {
 		return fmt.Errorf(mainServiceNeedsContainerNameKeyword, serviceName)
@@ -313,12 +313,12 @@ func validateMainServiceContainerName(serviceName string, serviceMap map[string]
 	return nil
 }
 
-func validatePorts(serviceName string, serviceMap map[string]interface{}) error {
+func validatePorts(serviceName string, serviceMap map[string]any) error {
 	p, ok := serviceMap["ports"]
 	if !ok {
 		return nil
 	}
-	for _, port := range p.([]interface{}) {
+	for _, port := range p.([]any) {
 		ps, ok := port.(string)
 		if !ok {
 			return fmt.Errorf("invalid port definition in service %v", serviceName)
@@ -331,12 +331,12 @@ func validatePorts(serviceName string, serviceMap map[string]interface{}) error 
 	return nil
 }
 
-func validateDeploySection(serviceName string, serviceMap map[string]interface{}) error {
+func validateDeploySection(serviceName string, serviceMap map[string]any) error {
 	d, has := serviceMap["deploy"]
 	if !has {
 		return nil
 	}
-	dm, ok := d.(map[string]interface{})
+	dm, ok := d.(map[string]any)
 	if !ok {
 		return fmt.Errorf("'deploy' keyword in service '%s' must be a map", serviceName)
 	}
@@ -345,7 +345,7 @@ func validateDeploySection(serviceName string, serviceMap map[string]interface{}
 			return fmt.Errorf(deployKeywordMustOnlyContainResources, serviceName, dk)
 		}
 	}
-	rm, rok := dm["resources"].(map[string]interface{})
+	rm, rok := dm["resources"].(map[string]any)
 	if !rok {
 		return nil
 	}
@@ -353,7 +353,7 @@ func validateDeploySection(serviceName string, serviceMap map[string]interface{}
 	if !hasRes {
 		return nil
 	}
-	rsm, rok := res.(map[string]interface{})
+	rsm, rok := res.(map[string]any)
 	if !rok {
 		return fmt.Errorf("'reservations' in 'resources' of service '%s' must be a map", serviceName)
 	}
@@ -363,13 +363,13 @@ func validateDeploySection(serviceName string, serviceMap map[string]interface{}
 	return nil
 }
 
-func validateGlobalVolumes(compose map[string]interface{}) error {
-	vm, ok := compose["volumes"].(map[string]interface{})
+func validateGlobalVolumes(compose map[string]any) error {
+	vm, ok := compose["volumes"].(map[string]any)
 	if !ok {
 		return nil
 	}
 	for _, v := range vm {
-		vmap, ok := v.(map[string]interface{})
+		vmap, ok := v.(map[string]any)
 		if ok && len(vmap) > 0 {
 			return errors.New(globalVolumeShouldNotHaveSubKeywords)
 		}
@@ -377,7 +377,7 @@ func validateGlobalVolumes(compose map[string]interface{}) error {
 	return nil
 }
 
-func validateServiceVolumes(maintainerName, appName, serviceName string, serviceMap map[string]interface{}) error {
+func validateServiceVolumes(maintainerName, appName, serviceName string, serviceMap map[string]any) error {
 	vList, err := extractVolumesList(serviceName, serviceMap)
 	if err != nil {
 		return err
@@ -390,11 +390,11 @@ func validateServiceVolumes(maintainerName, appName, serviceName string, service
 	return nil
 }
 
-func extractVolumesList(serviceName string, serviceMap map[string]interface{}) ([]string, error) {
+func extractVolumesList(serviceName string, serviceMap map[string]any) ([]string, error) {
 	if serviceMap["volumes"] == nil {
 		return nil, nil
 	}
-	v, ok := serviceMap["volumes"].([]interface{})
+	v, ok := serviceMap["volumes"].([]any)
 	if !ok {
 		return nil, fmt.Errorf("invalid 'volumes' in service %v", serviceName)
 	}
@@ -424,16 +424,16 @@ func validateVolumeEntry(maintainerName, appName, serviceName, vol string) error
 	return nil
 }
 
-func validateServiceNetworks(serviceName string, serviceMap map[string]interface{}) error {
+func validateServiceNetworks(serviceName string, serviceMap map[string]any) error {
 	if serviceMap["networks"] == nil {
 		return nil
 	}
 	return validateNetworksDefinition(serviceName, serviceMap["networks"])
 }
 
-func validateNetworksDefinition(serviceName string, networks interface{}) error {
+func validateNetworksDefinition(serviceName string, networks any) error {
 	switch n := networks.(type) {
-	case []interface{}:
+	case []any:
 		for _, net := range n {
 			netStr, ok := net.(string)
 			if !ok {
@@ -443,7 +443,7 @@ func validateNetworksDefinition(serviceName string, networks interface{}) error 
 				return fmt.Errorf("using host network is forbidden in service %v", serviceName)
 			}
 		}
-	case map[string]interface{}:
+	case map[string]any:
 		for netName := range n {
 			if netName == "host" {
 				return fmt.Errorf("using host network is forbidden in service %v", serviceName)
@@ -466,34 +466,34 @@ func CompleteDockerComposeYaml(maintainer, appName, filePath, host string) error
 	return writeCompose(composeMap, filePath, host)
 }
 
-func readCompose(filePath string) (map[string]interface{}, error) {
+func readCompose(filePath string) (map[string]any, error) {
 	b, err := os.ReadFile(filePath) // #nosec G304 (CWE-22): Potential file inclusion via variable; no problem since it is called internally
 	if err != nil {
 		return nil, err
 	}
-	var m map[string]interface{}
+	var m map[string]any
 	if err := yaml.Unmarshal(b, &m); err != nil {
 		return nil, err
 	}
 	return m, nil
 }
 
-func addExternalNetwork(m map[string]interface{}, maintainer, appName string) {
+func addExternalNetwork(m map[string]any, maintainer, appName string) {
 	net := fmt.Sprintf("%s_%s", maintainer, appName)
-	m["networks"] = map[string]interface{}{
-		net: map[string]interface{}{"external": true},
+	m["networks"] = map[string]any{
+		net: map[string]any{"external": true},
 	}
 }
 
-func updateServices(m map[string]interface{}, maintainer, appName string) {
-	svcs, _ := m["services"].(map[string]interface{})
+func updateServices(m map[string]any, maintainer, appName string) {
+	svcs, _ := m["services"].(map[string]any)
 	net := fmt.Sprintf("%s_%s", maintainer, appName)
 	for k, v := range svcs {
-		vm, _ := v.(map[string]interface{})
-		vm["networks"] = []interface{}{net}
+		vm, _ := v.(map[string]any)
+		vm["networks"] = []any{net}
 		vm["restart"] = "unless-stopped"
-		vm["cap_drop"] = []interface{}{"ALL"}
-		vm["cap_add"] = []interface{}{
+		vm["cap_drop"] = []any{"ALL"}
+		vm["cap_add"] = []any{
 			"CAP_NET_BIND_SERVICE", "CAP_CHOWN", "CAP_FOWNER",
 			"CAP_SETGID", "CAP_SETUID", "CAP_DAC_OVERRIDE",
 		}
@@ -502,15 +502,15 @@ func updateServices(m map[string]interface{}, maintainer, appName string) {
 	m["services"] = svcs
 }
 
-func updateVolumes(m map[string]interface{}) {
-	volumes, _ := m["volumes"].(map[string]interface{})
+func updateVolumes(m map[string]any) {
+	volumes, _ := m["volumes"].(map[string]any)
 	if volumes == nil {
 		return
 	}
 	for volName, volVal := range volumes {
-		vm, ok := volVal.(map[string]interface{})
+		vm, ok := volVal.(map[string]any)
 		if !ok || vm == nil {
-			vm = make(map[string]interface{})
+			vm = make(map[string]any)
 		}
 		vm["name"] = volName
 		volumes[volName] = vm
@@ -518,7 +518,7 @@ func updateVolumes(m map[string]interface{}) {
 	m["volumes"] = volumes
 }
 
-func writeCompose(m map[string]interface{}, filePath, host string) error {
+func writeCompose(m map[string]any, filePath, host string) error {
 	composeBytes, err := yaml.Marshal(m)
 	if err != nil {
 		return err
@@ -572,7 +572,7 @@ func ZipDirectory(dirPath string) ([]byte, error) {
 }
 
 func AssertYamlEquality(t *testing.T, a, b []byte) {
-	var m1, m2 map[string]interface{}
+	var m1, m2 map[string]any
 	if err := yaml.Unmarshal(a, &m1); err != nil {
 		t.Fail()
 	}
