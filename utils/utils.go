@@ -38,6 +38,7 @@ const (
 	HostField             = "host"
 	CurrentAttemptField   = "current_attempt"
 	MaximumAttemptsFields = "maximum_attempts"
+	PortField             = "port"
 )
 
 var Logger = deepstack.NewDeepStackLogger(os.Getenv("LOG_LEVEL"))
@@ -468,7 +469,7 @@ func WaitForPostgresDb(host, port string) (*sql.DB, error) {
 			}
 		}
 
-		Logger.Info("waiting for postgres database to be ready", HostField, host, CurrentAttemptField, counter, MaximumAttemptsFields, attempts)
+		Logger.Info("waiting for postgres database to be ready", HostField, host, CurrentAttemptField, counter, MaximumAttemptsFields, attempts, PortField, port)
 		time.Sleep(1 * time.Second)
 	}
 	return dbClient, nil
