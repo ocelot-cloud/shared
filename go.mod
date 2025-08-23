@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	github.com/golang-migrate/migrate/v4 v4.18.3
 	github.com/lib/pq v1.10.9
-	github.com/ocelot-cloud/deepstack v0.0.4
+	github.com/ocelot-cloud/deepstack v0.0.5
 	github.com/ocelot-cloud/task-runner v0.0.33
 	github.com/stretchr/testify v1.10.0
 	golang.org/x/crypto v0.41.0
