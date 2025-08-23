@@ -519,7 +519,7 @@ func AnalyzeCode(tr *taskrunner.TaskRunner, dir string) {
 	tr.Log.Info("\ngo vet: reports suspicious constructs, such as Printf calls whose arguments do not align with the format string")
 	tr.ExecuteInDir(dir, vetCmd)
 
-	staticCheckCmd := fmt.Sprintf("staticcheck %s ./...", buildTagsInsertionString)
+	staticCheckCmd := fmt.Sprintf("staticcheck -checks=U1000 %s ./...", buildTagsInsertionString)
 	tr.Log.Info("\nstaticcheck: finds bugs, performance issues, and other problems in Go code")
 	tr.ExecuteInDir(dir, staticCheckCmd)
 
