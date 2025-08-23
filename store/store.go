@@ -2,6 +2,7 @@ package store
 
 import (
 	"fmt"
+
 	"github.com/ocelot-cloud/shared/utils"
 	"github.com/ocelot-cloud/shared/validation"
 )
@@ -34,7 +35,31 @@ var (
 	DefaultValidationCode = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 )
 
-func (h *AppStoreClient) RegisterAndValidateUser(user, password, email string) error {
+type AppStoreClient interface {
+	RegisterAndValidateUser(user, password, email string) error
+	RegisterUser(user, password, email string) error
+	ValidateCode() error
+	Login(username, password string) error
+	DeleteUser() error
+	CreateApp(appName string) (string, error)
+	SearchForApps(searchTerm string, showUnofficialApps bool) ([]AppWithLatestVersion, error)
+	ListOwnApps() ([]App, error)
+	UploadVersion(appId, versionName string, content []byte) (string, error)
+	DownloadVersion(versionId string) (*FullVersionInfo, error)
+	GetVersions(appId string) ([]Version, error)
+	DeleteVersion(versionId string) error
+	DeleteApp(appId string) error
+	ChangePassword(oldPassword, newPassword string) error
+	WipeData()
+	Logout() error
+	CheckAuth() error
+}
+
+type AppStoreClientImpl struct {
+	Parent utils.ComponentClient
+}
+
+func (h *AppStoreClientImpl) RegisterAndValidateUser(user, password, email string) error {
 	err := h.RegisterUser(user, password, email)
 	if err != nil {
 		return err
@@ -42,7 +67,7 @@ func (h *AppStoreClient) RegisterAndValidateUser(user, password, email string) e
 	return h.ValidateCode()
 }
 
-func (h *AppStoreClient) RegisterUser(user, password, email string) error {
+func (h *AppStoreClientImpl) RegisterUser(user, password, email string) error {
 	form := RegistrationForm{
 		User:     user,
 		Password: password,
@@ -52,12 +77,12 @@ func (h *AppStoreClient) RegisterUser(user, password, email string) error {
 	return err
 }
 
-func (h *AppStoreClient) ValidateCode() error {
+func (h *AppStoreClientImpl) ValidateCode() error {
 	_, err := h.Parent.DoRequest(EmailValidationPath+"?code="+DefaultValidationCode, nil)
 	return err
 }
 
-func (h *AppStoreClient) Login(username, password string) error {
+func (h *AppStoreClientImpl) Login(username, password string) error {
 	creds := LoginCredentials{
 		User:     username,
 		Password: password,
@@ -76,12 +101,12 @@ func (h *AppStoreClient) Login(username, password string) error {
 	return nil
 }
 
-func (h *AppStoreClient) DeleteUser() error {
+func (h *AppStoreClientImpl) DeleteUser() error {
 	_, err := h.Parent.DoRequest(DeleteUserPath, nil)
 	return err
 }
 
-func (h *AppStoreClient) CreateApp(appName string) (string, error) {
+func (h *AppStoreClientImpl) CreateApp(appName string) (string, error) {
 	_, err := h.Parent.DoRequest(AppCreationPath, AppNameString{appName})
 	if err != nil {
 		return "", err
@@ -98,7 +123,7 @@ func (h *AppStoreClient) CreateApp(appName string) (string, error) {
 	return "", fmt.Errorf("app not found on server")
 }
 
-func (h *AppStoreClient) SearchForApps(searchTerm string, showUnofficialApps bool) ([]AppWithLatestVersion, error) {
+func (h *AppStoreClientImpl) SearchForApps(searchTerm string, showUnofficialApps bool) ([]AppWithLatestVersion, error) {
 	appSearchRequest := AppSearchRequest{
 		SearchTerm:         searchTerm,
 		ShowUnofficialApps: showUnofficialApps,
@@ -116,7 +141,7 @@ func (h *AppStoreClient) SearchForApps(searchTerm string, showUnofficialApps boo
 	return *apps, nil
 }
 
-func (h *AppStoreClient) ListOwnApps() ([]App, error) {
+func (h *AppStoreClientImpl) ListOwnApps() ([]App, error) {
 	result, err := h.Parent.DoRequest(AppGetListPath, nil)
 	if err != nil {
 		return nil, err
@@ -130,7 +155,7 @@ func (h *AppStoreClient) ListOwnApps() ([]App, error) {
 	return *apps, nil
 }
 
-func (h *AppStoreClient) UploadVersion(appId, versionName string, content []byte) (string, error) {
+func (h *AppStoreClientImpl) UploadVersion(appId, versionName string, content []byte) (string, error) {
 	tapUpload := &VersionUpload{
 		AppId:   appId,
 		Version: versionName,
@@ -153,7 +178,7 @@ func (h *AppStoreClient) UploadVersion(appId, versionName string, content []byte
 	return "", fmt.Errorf("version not found on server")
 }
 
-func (h *AppStoreClient) DownloadVersion(versionId string) (*FullVersionInfo, error) {
+func (h *AppStoreClientImpl) DownloadVersion(versionId string) (*FullVersionInfo, error) {
 	result, err := h.Parent.DoRequest(DownloadPath, NumberString{versionId})
 	if err != nil {
 		return nil, err
@@ -172,7 +197,7 @@ func (h *AppStoreClient) DownloadVersion(versionId string) (*FullVersionInfo, er
 	return fullVersionInfo, nil
 }
 
-func (h *AppStoreClient) GetVersions(appId string) ([]Version, error) {
+func (h *AppStoreClientImpl) GetVersions(appId string) ([]Version, error) {
 	result, err := h.Parent.DoRequest(GetVersionsPath, NumberString{appId})
 	if err != nil {
 		return nil, err
@@ -186,17 +211,17 @@ func (h *AppStoreClient) GetVersions(appId string) ([]Version, error) {
 	return *versions, nil
 }
 
-func (h *AppStoreClient) DeleteVersion(versionId string) error {
+func (h *AppStoreClientImpl) DeleteVersion(versionId string) error {
 	_, err := h.Parent.DoRequest(VersionDeletePath, NumberString{versionId})
 	return err
 }
 
-func (h *AppStoreClient) DeleteApp(appId string) error {
+func (h *AppStoreClientImpl) DeleteApp(appId string) error {
 	_, err := h.Parent.DoRequest(AppDeletePath, NumberString{appId})
 	return err
 }
 
-func (h *AppStoreClient) ChangePassword(oldPassword, newPassword string) error {
+func (h *AppStoreClientImpl) ChangePassword(oldPassword, newPassword string) error {
 	form := ChangePasswordForm{
 		OldPassword: oldPassword,
 		NewPassword: newPassword,
@@ -206,19 +231,19 @@ func (h *AppStoreClient) ChangePassword(oldPassword, newPassword string) error {
 	return err
 }
 
-func (h *AppStoreClient) WipeData() {
+func (h *AppStoreClientImpl) WipeData() {
 	_, err := h.Parent.DoRequest(WipeDataPath, nil)
 	if err != nil {
 		panic("failed to wipe data: " + err.Error())
 	}
 }
 
-func (h *AppStoreClient) Logout() error {
+func (h *AppStoreClientImpl) Logout() error {
 	_, err := h.Parent.DoRequest(LogoutPath, nil)
 	return err
 }
 
-func (h *AppStoreClient) CheckAuth() error {
+func (h *AppStoreClientImpl) CheckAuth() error {
 	_, err := h.Parent.DoRequest(AuthCheckPath, nil)
 	return err
 }

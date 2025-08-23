@@ -1,7 +1,6 @@
 package store
 
 import (
-	"github.com/ocelot-cloud/shared/utils"
 	"time"
 )
 
@@ -37,10 +36,6 @@ type RegistrationForm struct {
 	User     string `json:"user" validate:"user_name"`
 	Password string `json:"password" validate:"password"`
 	Email    string `json:"email" validate:"email"`
-}
-
-type AppStoreClient struct {
-	Parent utils.ComponentClient
 }
 
 type LoginCredentials struct {
